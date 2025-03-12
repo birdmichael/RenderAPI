@@ -1,0 +1,8 @@
+{
+  "username": "测试用户",
+  "email": "test@example.com",
+  "age": 28,
+  "is_active": true,
+  "interests": ["编程", "阅读", "旅行"],
+  "header_value": "test-header-value"
+} 

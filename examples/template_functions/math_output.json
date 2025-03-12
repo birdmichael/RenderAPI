@@ -1,0 +1,16 @@
+{
+  "calculation": {
+    "num1": 10,
+    "num2": 5,
+    "add": 15,
+    "subtract": 5,
+    "multiply": 50,
+    "divide": 2,
+    "max": 10,
+    "min": 5,
+    "round": 4,
+    "ceil": 4,
+    "floor": 3,
+    "random": 7
+  }
+}

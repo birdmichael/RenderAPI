@@ -1,0 +1,13 @@
+{
+    "User": {
+        "name": "张三",
+        "age": 30,
+        "email": "zhangsan@example.com",
+        "interests": ["编程", "阅读", "旅行"],
+        "address": {
+            "city": "北京",
+            "country": "中国"
+        },
+        "active": true
+    }
+} 

@@ -1,0 +1,11 @@
+{
+  "profile": {
+    "username": "JOHN_DOE",
+    "display_name": "John Doe",
+    "email": "john.doe@example.com",
+    "bio": "这是一个简介，包含了一些信息",
+    "url_safe_username": "john_doe",
+    "html_bio": "&lt;div&gt;这是HTML内容&lt;/div&gt;",
+    "admin_role": "admin"
+  }
+}

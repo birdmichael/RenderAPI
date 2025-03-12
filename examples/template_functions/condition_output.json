@@ -1,0 +1,9 @@
+{
+  "user": {
+    "name": "张三",
+    "nickname": "",
+    "status": "活跃",
+    "access_level": "高级用户",
+    "premium": true
+  }
+}

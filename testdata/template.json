@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/post",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Test-Header": "{{.header_value}}"
+    }
+  },
+  "body": {
+    "username": "{{.username}}",
+    "email": "{{.email}}",
+    "age": {{.age}},
+    "is_active": {{.is_active}},
+    "interests": [{{range $index, $item := .interests}}{{if $index}}, {{end}}"{{$item}}"{{end}}]
+  }
+} 

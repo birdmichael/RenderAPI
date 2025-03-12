@@ -1,0 +1,27 @@
+# IDE和编辑器配置
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 编译产物
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+httpclient
+
+# 测试缓存
+*.test
+*.out
+coverage.txt
+
+# 依赖目录
+/vendor/
+
+# 临时文件
+*.log
+.DS_Store 
