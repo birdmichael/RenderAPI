@@ -24,6 +24,23 @@ func (h *CustomHook) Before(req *http.Request) (*http.Request, error) {
 	return req, nil
 }
 
+// BeforeAsync 异步执行请求前处理
+func (h *CustomHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) {
+	reqChan := make(chan *http.Request, 1)
+	errChan := make(chan error, 1)
+
+	go func() {
+		modifiedReq, err := h.Before(req)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		reqChan <- modifiedReq
+	}()
+
+	return reqChan, errChan
+}
+
 // 添加钩子
 func setupHooks(c *client.Client) {
 	// 添加日志钩子

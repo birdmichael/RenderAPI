@@ -1,0 +1,93 @@
+{
+  "request": {
+    "method": "POST",
+    "baseURL": "https://api.example.com",
+    "path": "/users",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-API-Key": "{{.apiKey}}"
+    },
+    "timeout": 30
+  },
+  "beforeHooks": [
+    {
+      "type": "js",
+      "name": "authHook",
+      "script": "function processRequest(request) { console.log('Auth处理请求...'); return request; }",
+      "async": false,
+      "timeout": 10
+    },
+    {
+      "type": "js",
+      "name": "preRequest",
+      "script": "function processRequest(request) { console.log('前置处理请求...'); return request; }",
+      "async": true,
+      "timeout": 5
+    },
+    {
+      "type": "command",
+      "name": "timestamp",
+      "command": "jq '.body.timestamp = now' | jq '.body.signature = \"$SIGNATURE\"'",
+      "async": false,
+      "timeout": 3
+    }
+  ],
+  "afterHooks": [
+    {
+      "type": "js",
+      "name": "postProcess",
+      "script": "function processResponse(response) { console.log('后置处理响应...'); return response; }",
+      "async": false,
+      "timeout": 5
+    },
+    {
+      "type": "command",
+      "name": "filterActive",
+      "command": "jq '.data = .data | map(select(.active == true))'",
+      "async": false,
+      "timeout": 3
+    }
+  ],
+  "body": {
+    "user": {
+      "name": "{{.name}}",
+      "email": "{{.email}}",
+      "age": "{{default .age 18}}",
+      "role": "{{coalesce .role \"user\"}}",
+      "isActive": "{{default .isActive true}}",
+      "createdAt": "{{formatDate (now)}}"
+    },
+    "metadata": {
+      "clientVersion": "{{.version}}",
+      "deviceInfo": {
+        "os": "{{.deviceInfo.os}}",
+        "browser": "{{.deviceInfo.browser}}"
+      },
+      "requestId": "{{randString 16}}",
+      "debug": "{{default .debug false}}"
+    },
+    "items": [
+      {{range $index, $item := .items}}
+      {{if $index}},{{end}}
+      {
+        "id": "{{$item.id}}",
+        "name": "{{$item.name}}",
+        "price": "{{$item.price}}",
+        "quantity": "{{default $item.quantity 1}}",
+        "total": "{{mul $item.price (default $item.quantity 1)}}"
+      }
+      {{end}}
+    ]
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 300,
+    "keyPattern": "users-{{.name}}-{{.email}}"
+  },
+  "retry": {
+    "enabled": true,
+    "maxAttempts": 3,
+    "initialDelay": 1000,
+    "backoffFactor": 2
+  }
+} 

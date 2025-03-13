@@ -1,128 +1,130 @@
-// Package hooks 提供请求和响应钩子功能
+// Package hooks 提供请求处理前后的钩子功能
 package hooks
 
 import (
 	"bytes"
-	"encoding/json"
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
+	"time"
 )
 
-// BeforeRequestHook 定义请求前钩子接口
+// 定义错误类型
+var (
+	ErrJSHookMissingSourceOrContent  = errors.New("JS钩子必须指定source或content")
+	ErrCmdHookMissingSourceOrContent = errors.New("命令钩子必须指定source或content")
+	ErrCustomHookNotSupported        = errors.New("自定义钩子不能通过模板创建，需要在代码中注册")
+	ErrUnsupportedHookType           = errors.New("不支持的钩子类型")
+)
+
+// BeforeRequestHookFunc 请求前钩子函数
+type BeforeRequestHookFunc func(*http.Request) (*http.Request, error)
+
+// AfterResponseHookFunc 响应后钩子函数
+type AfterResponseHookFunc func(*http.Response) (*http.Response, error)
+
+// BeforeRequestHook 请求前钩子接口
 type BeforeRequestHook interface {
 	Before(req *http.Request) (*http.Request, error)
+	BeforeAsync(req *http.Request) (chan *http.Request, chan error)
 }
 
-// AfterResponseHook 定义响应后钩子接口
+// AfterResponseHook 响应后钩子接口
 type AfterResponseHook interface {
 	After(resp *http.Response) (*http.Response, error)
+	AfterAsync(resp *http.Response) (chan *http.Response, chan error)
 }
 
-// LoggingHook 日志记录钩子
-type LoggingHook struct{}
-
-// Before 记录请求信息
-func (h *LoggingHook) Before(req *http.Request) (*http.Request, error) {
-	fmt.Printf("正在发送 %s 请求到 %s\n", req.Method, req.URL.String())
-	return req, nil
+// Hook 通用钩子接口
+type Hook interface {
+	GetConfig() *HookConfig
 }
 
-// AuthHook 认证钩子
-type AuthHook struct {
-	Token string
+// HookConfig 钩子配置
+type HookConfig struct {
+	Type           string
+	Name           string
+	Async          bool
+	TimeoutSeconds int
 }
 
-// Before 添加认证信息
-func (h *AuthHook) Before(req *http.Request) (*http.Request, error) {
-	req.Header.Set("Authorization", "Bearer "+h.Token)
-	return req, nil
+// HookDefinition 钩子定义
+type HookDefinition struct {
+	Type     string            `json:"type"`
+	Name     string            `json:"name"`
+	Script   string            `json:"script,omitempty"`
+	Command  string            `json:"command,omitempty"`
+	Function string            `json:"function,omitempty"`
+	Config   map[string]string `json:"config,omitempty"`
+	Async    bool              `json:"async,omitempty"`
+	Timeout  int               `json:"timeout,omitempty"`
 }
 
-// ResponseLogHook 响应日志钩子
-type ResponseLogHook struct{}
-
-// After 记录响应信息
-func (h *ResponseLogHook) After(resp *http.Response) (*http.Response, error) {
-	fmt.Printf("收到响应: 状态码 %d\n", resp.StatusCode)
-	return resp, nil
-}
-
-// CustomHook 自定义钩子实现
-type CustomHook struct {
-	BeforeFn func(req *http.Request) (*http.Request, error)
-	AfterFn  func(resp *http.Response) (*http.Response, error)
-}
-
-// Before 执行自定义前置操作
-func (h *CustomHook) Before(req *http.Request) (*http.Request, error) {
-	if h.BeforeFn != nil {
-		return h.BeforeFn(req)
-	}
-	return req, nil
-}
-
-// After 执行自定义后置操作
-func (h *CustomHook) After(resp *http.Response) (*http.Response, error) {
-	if h.AfterFn != nil {
-		return h.AfterFn(resp)
-	}
-	return resp, nil
-}
-
-// FieldTransformHook 字段转换钩子
-type FieldTransformHook struct{}
-
-// Before 在请求前转换JSON字段
-func (h *FieldTransformHook) Before(req *http.Request) (*http.Request, error) {
-	// 只处理POST和PUT请求
-	if req.Method != http.MethodPost && req.Method != http.MethodPut {
-		return req, nil
+// ReadRequestBody 读取请求体内容并重置Body
+func ReadRequestBody(req *http.Request) ([]byte, error) {
+	if req == nil || req.Body == nil {
+		return []byte{}, nil
 	}
 
-	// 读取请求体
-	if req.Body == nil {
-		return req, nil
-	}
-
-	body, err := io.ReadAll(req.Body)
+	bodyBytes, err := io.ReadAll(req.Body)
 	req.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("读取请求体失败: %w", err)
+		return nil, err
 	}
 
-	// 解析JSON
-	var data map[string]interface{}
-	if err := json.Unmarshal(body, &data); err != nil {
-		// 如果不是JSON，直接返回原始请求
-		req.Body = io.NopCloser(bytes.NewBuffer(body))
-		return req, nil
-	}
+	// 重置请求体，以便后续处理可以再次读取
+	req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	return bodyBytes, nil
+}
 
-	// 字段转换
-	if userValue, ok := data["user"]; ok {
-		data["phone"] = userValue
-		delete(data, "user")
-	}
-
-	// 重新编码为JSON
-	newBody, err := json.Marshal(data)
-	if err != nil {
-		return nil, fmt.Errorf("JSON编码失败: %w", err)
-	}
-
-	// 更新请求
-	req.Body = io.NopCloser(bytes.NewBuffer(newBody))
-	req.ContentLength = int64(len(newBody))
-
+// ReplaceRequestBody 替换请求的正文内容
+func ReplaceRequestBody(req *http.Request, bodyBytes []byte) (*http.Request, error) {
+	req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	req.ContentLength = int64(len(bodyBytes))
 	return req, nil
 }
 
-// NewScriptHookFromFile 从文件创建脚本钩子
-func NewScriptHookFromFile(scriptFile string) (BeforeRequestHook, error) {
-	if _, err := os.Stat(scriptFile); os.IsNotExist(err) {
-		return nil, fmt.Errorf("脚本文件不存在: %s", scriptFile)
+// IsBodyJSON 检查请求体是否为JSON格式
+func IsBodyJSON(req *http.Request) bool {
+	contentType := req.Header.Get("Content-Type")
+	return contentType == "application/json" || contentType == "application/json; charset=utf-8"
+}
+
+// ExecuteHookWithTimeout 带超时执行钩子
+func ExecuteHookWithTimeout(ctx context.Context, hook func() error, timeoutSeconds int) error {
+	if timeoutSeconds <= 0 {
+		// 默认超时10秒
+		timeoutSeconds = 10
 	}
-	return NewScriptHook(scriptFile), nil
+
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- hook()
+	}()
+
+	select {
+	case err := <-errCh:
+		return err
+	case <-ctx.Done():
+		return errors.New("hook execution timed out")
+	}
+}
+
+// CreateHookFromDefinition 从定义创建钩子
+func CreateHookFromDefinition(def *HookDefinition) (interface{}, error) {
+	switch def.Type {
+	case "js":
+		return NewJSHookFromString(def.Script, def.Async, def.Timeout)
+	case "command":
+		return NewCommandHook(def.Command, def.Timeout, def.Async), nil
+	case "function":
+		return nil, fmt.Errorf("未实现的钩子类型: %s", def.Type)
+	default:
+		return nil, fmt.Errorf("未知的钩子类型: %s", def.Type)
+	}
 }

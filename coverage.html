@@ -1,0 +1,3944 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>httpclient: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/birdmichael/RenderAPI/cmd/httpclient/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/birdmichael/RenderAPI/examples/advanced/main.go (0.0%)</option>
+				
+				<option value="file2">github.com/birdmichael/RenderAPI/examples/basic/main.go (0.0%)</option>
+				
+				<option value="file3">github.com/birdmichael/RenderAPI/examples/template_file/main.go (0.0%)</option>
+				
+				<option value="file4">github.com/birdmichael/RenderAPI/examples/template_functions/main.go (0.0%)</option>
+				
+				<option value="file5">github.com/birdmichael/RenderAPI/internal/utils/utils.go (14.6%)</option>
+				
+				<option value="file6">github.com/birdmichael/RenderAPI/main.go (0.0%)</option>
+				
+				<option value="file7">github.com/birdmichael/RenderAPI/pkg/client/client.go (26.8%)</option>
+				
+				<option value="file8">github.com/birdmichael/RenderAPI/pkg/config/config.go (88.2%)</option>
+				
+				<option value="file9">github.com/birdmichael/RenderAPI/pkg/hooks/cmd_hook.go (73.0%)</option>
+				
+				<option value="file10">github.com/birdmichael/RenderAPI/pkg/hooks/custom_hook.go (77.8%)</option>
+				
+				<option value="file11">github.com/birdmichael/RenderAPI/pkg/hooks/hooks.go (32.1%)</option>
+				
+				<option value="file12">github.com/birdmichael/RenderAPI/pkg/hooks/js_hook.go (60.7%)</option>
+				
+				<option value="file13">github.com/birdmichael/RenderAPI/pkg/template/builtin_functions.go (70.5%)</option>
+				
+				<option value="file14">github.com/birdmichael/RenderAPI/pkg/template/template.go (90.7%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// httpclient命令行工具 - 一个灵活的HTTP请求工具，支持模板文件
+package main
+
+import (
+        "context"
+        "encoding/json"
+        "flag"
+        "fmt"
+        "net/http"
+        "os"
+        "strings"
+
+        "github.com/birdmichael/RenderAPI/internal/utils"
+        "github.com/birdmichael/RenderAPI/pkg/client"
+        "github.com/birdmichael/RenderAPI/pkg/config"
+        "github.com/birdmichael/RenderAPI/pkg/hooks"
+)
+
+func main() <span class="cov0" title="0">{
+        // 命令行参数
+        configPath := flag.String("config", "config.json", "配置文件路径")
+        method := flag.String("method", "GET", "HTTP方法 (GET, POST, PUT, DELETE)")
+        url := flag.String("url", "", "请求URL")
+        path := flag.String("path", "", "请求路径")
+        templateFile := flag.String("template", "", "模板文件路径")
+        dataFile := flag.String("data", "", "数据文件路径")
+        outputFile := flag.String("output", "", "输出文件路径")
+        rawData := flag.String("raw", "", "原始请求数据")
+        scriptFile := flag.String("script", "", "前置处理脚本路径")
+
+        flag.Parse()
+
+        // 加载配置
+        cfg, err := config.LoadConfig(*configPath)
+        if err != nil </span><span class="cov0" title="0">{
+                // 如果配置文件不存在，使用默认配置
+                fmt.Printf("警告: 无法加载配置，使用默认值: %v\n", err)
+                cfg = config.DefaultConfig()
+        }</span>
+
+        // 创建HTTP客户端
+        <span class="cov0" title="0">baseURL := cfg.BaseURL
+        if *url != "" </span><span class="cov0" title="0">{
+                baseURL = *url
+        }</span>
+
+        <span class="cov0" title="0">httpClient := client.NewClient(baseURL, cfg.GetTimeout())
+
+        // 设置默认请求头
+        for key, value := range cfg.DefaultHeaders </span><span class="cov0" title="0">{
+                httpClient.SetHeader(key, value)
+        }</span>
+
+        // 添加钩子
+        <span class="cov0" title="0">if cfg.EnableLogging </span><span class="cov0" title="0">{
+                httpClient.AddBeforeHook(&amp;hooks.LoggingHook{})
+                httpClient.AddAfterHook(&amp;hooks.ResponseLogHook{})
+        }</span>
+
+        <span class="cov0" title="0">if cfg.AuthToken != "" </span><span class="cov0" title="0">{
+                httpClient.AddBeforeHook(&amp;hooks.AuthHook{Token: cfg.AuthToken})
+        }</span>
+
+        // 添加脚本钩子（如果指定）
+        <span class="cov0" title="0">if *scriptFile != "" </span><span class="cov0" title="0">{
+                if err := httpClient.AddJSHookFromFile(*scriptFile, false, 30); err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("添加脚本钩子失败: %v\n", err)
+                        os.Exit(1)
+                }</span>
+        }
+
+        <span class="cov0" title="0">var resp *http.Response
+        ctx := context.Background()
+
+        // 使用模板文件和数据文件
+        if *templateFile != "" &amp;&amp; *dataFile != "" </span><span class="cov0" title="0">{
+                resp, err = httpClient.ExecuteTemplateWithDataFile(ctx, *templateFile, *dataFile)
+                if err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("执行模板失败: %v\n", err)
+                        os.Exit(1)
+                }</span>
+        } else<span class="cov0" title="0"> {
+                // 准备请求体
+                var requestBody []byte
+
+                if *templateFile != "" </span><span class="cov0" title="0">{
+                        // 加载模板
+                        data, err := os.ReadFile(*templateFile)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("读取模板文件失败: %v\n", err)
+                                os.Exit(1)
+                        }</span>
+
+                        // 检查是否为完整模板格式（包含request和body）
+                        <span class="cov0" title="0">var tmplStruct struct {
+                                Request interface{} `json:"request"`
+                                Body    interface{} `json:"body"`
+                        }
+
+                        if err := json.Unmarshal(data, &amp;tmplStruct); err == nil &amp;&amp; tmplStruct.Request != nil </span><span class="cov0" title="0">{
+                                // 如果是完整模板，使用上下文执行
+                                var templateData map[string]interface{}
+                                if *dataFile != "" </span><span class="cov0" title="0">{
+                                        templateData, err = utils.LoadDataFromFile(*dataFile)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                fmt.Printf("加载数据文件失败: %v\n", err)
+                                                os.Exit(1)
+                                        }</span>
+                                }
+
+                                <span class="cov0" title="0">resp, err = httpClient.ExecuteTemplateJSON(ctx, string(data), templateData)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        fmt.Printf("执行模板失败: %v\n", err)
+                                        os.Exit(1)
+                                }</span>
+                        } else<span class="cov0" title="0"> {
+                                // 使用模板引擎处理非完整模板
+                                templateEngine := httpClient.GetTemplateEngine()
+
+                                // 添加模板
+                                err = templateEngine.AddTemplate(*templateFile, string(data))
+                                if err != nil </span><span class="cov0" title="0">{
+                                        fmt.Printf("添加模板失败: %v\n", err)
+                                        os.Exit(1)
+                                }</span>
+
+                                // 加载数据
+                                <span class="cov0" title="0">var templateData interface{}
+                                if *dataFile != "" </span><span class="cov0" title="0">{
+                                        dataContent, err := os.ReadFile(*dataFile)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                fmt.Printf("读取数据文件失败: %v\n", err)
+                                                os.Exit(1)
+                                        }</span>
+
+                                        <span class="cov0" title="0">err = json.Unmarshal(dataContent, &amp;templateData)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                fmt.Printf("解析数据文件失败: %v\n", err)
+                                                os.Exit(1)
+                                        }</span>
+                                }
+
+                                // 渲染模板
+                                <span class="cov0" title="0">requestBody, err = templateEngine.RenderJSONTemplate(*templateFile, templateData)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        fmt.Printf("渲染模板失败: %v\n", err)
+                                        os.Exit(1)
+                                }</span>
+                        }
+                } else<span class="cov0" title="0"> if *rawData != "" </span><span class="cov0" title="0">{
+                        // 使用原始数据
+                        requestBody = []byte(*rawData)
+                }</span>
+
+                // 如果尚未发送请求，使用传统方式发送
+                <span class="cov0" title="0">if resp == nil &amp;&amp; (len(requestBody) &gt; 0 || *method == "GET" || *method == "DELETE") </span><span class="cov0" title="0">{
+                        // 发送请求
+                        httpMethod := strings.ToUpper(*method)
+
+                        switch httpMethod </span>{
+                        case "GET":<span class="cov0" title="0">
+                                resp, err = httpClient.Get(*path)</span>
+                        case "POST":<span class="cov0" title="0">
+                                resp, err = httpClient.Post(*path, requestBody)</span>
+                        case "PUT":<span class="cov0" title="0">
+                                resp, err = httpClient.Put(*path, requestBody)</span>
+                        case "DELETE":<span class="cov0" title="0">
+                                resp, err = httpClient.Delete(*path)</span>
+                        default:<span class="cov0" title="0">
+                                fmt.Printf("不支持的HTTP方法: %s\n", httpMethod)
+                                os.Exit(1)</span>
+                        }
+
+                        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("请求失败: %v\n", err)
+                                os.Exit(1)
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">if resp == nil </span><span class="cov0" title="0">{
+                fmt.Println("错误: 未发送任何请求")
+                os.Exit(1)
+        }</span>
+
+        // 读取响应
+        <span class="cov0" title="0">responseBody, err := utils.ReadResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("读取响应失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        // 输出结果
+        <span class="cov0" title="0">if *outputFile != "" </span><span class="cov0" title="0">{
+                err = os.WriteFile(*outputFile, responseBody, 0644)
+                if err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("写入输出文件失败: %v\n", err)
+                        os.Exit(1)
+                }</span>
+                <span class="cov0" title="0">fmt.Printf("响应已保存到: %s\n", *outputFile)</span>
+        } else<span class="cov0" title="0"> {
+                fmt.Printf("状态码: %d\n", resp.StatusCode)
+                fmt.Printf("响应头:\n")
+                for key, values := range resp.Header </span><span class="cov0" title="0">{
+                        fmt.Printf("  %s: %s\n", key, strings.Join(values, ", "))
+                }</span>
+                <span class="cov0" title="0">fmt.Printf("响应体:\n%s\n", string(responseBody))</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Advanced example - 展示RenderAPI的高级功能
+package main
+
+import (
+        "context"
+        "fmt"
+        "net/http"
+        "os"
+        "path/filepath"
+        "time"
+
+        "github.com/birdmichael/RenderAPI/internal/utils"
+        "github.com/birdmichael/RenderAPI/pkg/client"
+        "github.com/birdmichael/RenderAPI/pkg/hooks"
+)
+
+// 自定义钩子
+type CustomHook struct{}
+
+func (h *CustomHook) Before(req *http.Request) (*http.Request, error) <span class="cov0" title="0">{
+        fmt.Println("[自定义钩子] 请求前处理")
+        // 添加自定义请求头
+        req.Header.Set("X-Custom-Header", "custom-value")
+        return req, nil
+}</span>
+
+// BeforeAsync 异步执行请求前处理
+func (h *CustomHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov0" title="0">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov0" title="0">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov0" title="0">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov0" title="0">return reqChan, errChan</span>
+}
+
+// 添加钩子
+func setupHooks(c *client.Client) <span class="cov0" title="0">{
+        // 添加日志钩子
+        c.AddBeforeHook(&amp;hooks.LoggingHook{})
+        c.AddAfterHook(&amp;hooks.ResponseLogHook{})
+
+        // 添加自定义钩子
+        c.AddBeforeHook(&amp;CustomHook{})
+
+        // 添加字段转换钩子（将"user"字段转换为"phone"）
+        c.AddBeforeHook(&amp;hooks.FieldTransformHook{})
+}</span>
+
+func main() <span class="cov0" title="0">{
+        // 创建配置
+        baseURL := "https://httpbin.org"
+        timeout := 30 * time.Second
+
+        // 创建客户端
+        apiClient := client.NewClient(baseURL, timeout)
+
+        // 设置默认头
+        apiClient.SetHeader("User-Agent", "RenderAPI-Advanced-Example")
+        apiClient.SetHeader("Content-Type", "application/json")
+
+        // 设置钩子
+        setupHooks(apiClient)
+
+        // 创建和使用上下文
+        ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+        defer cancel()
+
+        fmt.Println("\n=== 1. 从文件加载模板和数据 ===")
+        // 准备示例文件路径
+        exPath, err := os.Executable()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("获取可执行文件路径失败: %v\n", err)
+                exPath = "."
+        }</span>
+
+        <span class="cov0" title="0">exDir := filepath.Dir(exPath)
+        templateFile := filepath.Join(exDir, "template.json")
+        dataFile := filepath.Join(exDir, "data.json")
+
+        // 创建示例文件
+        createExampleFiles(templateFile, dataFile)
+
+        // 执行模板
+        resp, err := apiClient.ExecuteTemplateWithDataFile(ctx, templateFile, dataFile)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("执行模板失败: %v\n", err)
+        }</span> else<span class="cov0" title="0"> {
+                body, _ := utils.ReadResponseBody(resp)
+                fmt.Printf("\n状态码: %d\n", resp.StatusCode)
+                prettyBody, _ := utils.PrettyJSON(body)
+                fmt.Printf("响应体:\n%s\n", string(prettyBody))
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("\n=== 2. 使用字段转换钩子 ===")
+        // 准备请求体，其中包含"user"字段（会被钩子转换为"phone"）
+        jsonBody := []byte(`{
+                "user": "13800138000",
+                "password": "secret123"
+        }`)
+
+        resp, err = apiClient.Post("/post", jsonBody)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("请求失败: %v\n", err)
+        }</span> else<span class="cov0" title="0"> {
+                body, _ := utils.ReadResponseBody(resp)
+                fmt.Printf("\n状态码: %d\n", resp.StatusCode)
+                prettyBody, _ := utils.PrettyJSON(body)
+                fmt.Printf("响应体:\n%s\n", string(prettyBody))
+        }</span>
+
+        // 清理示例文件
+        <span class="cov0" title="0">os.Remove(templateFile)
+        os.Remove(dataFile)</span>
+}
+
+// 创建示例文件
+func createExampleFiles(templateFile, dataFile string) <span class="cov0" title="0">{
+        // 模板文件
+        templateContent := `{
+                "request": {
+                        "method": "POST",
+                        "path": "/post",
+                        "headers": {
+                                "Content-Type": "application/json",
+                                "X-Template-Header": "{{.header_value}}"
+                        }
+                },
+                "body": {
+                        "username": "{{.username}}",
+                        "email": "{{.email}}",
+                        "age": {{.age}},
+                        "is_active": {{.is_active}},
+                        "registration_date": "{{.registration_date}}",
+                        "interests": [{{range $index, $item := .interests}}{{if $index}}, {{end}}"{{$item}}"{{end}}]
+                }
+        }`
+
+        // 数据文件
+        dataContent := `{
+                "username": "测试用户",
+                "email": "test@example.com",
+                "age": 28,
+                "is_active": true,
+                "registration_date": "2023-05-15",
+                "interests": ["编程", "阅读", "旅行"],
+                "header_value": "template-header-value"
+        }`
+
+        // 写入文件
+        os.WriteFile(templateFile, []byte(templateContent), 0644)
+        os.WriteFile(dataFile, []byte(dataContent), 0644)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Basic example - 展示RenderAPI的基本用法
+package main
+
+import (
+        "context"
+        "fmt"
+        "os"
+
+        "github.com/birdmichael/RenderAPI/pkg/client"
+)
+
+func main() <span class="cov0" title="0">{
+        // 创建新的API客户端
+        apiClient := client.NewClient("https://httpbin.org", 30)
+
+        // 添加默认请求头
+        apiClient.SetHeader("User-Agent", "RenderAPI-Example")
+        apiClient.SetHeader("Content-Type", "application/json")
+
+        fmt.Println("=== 发送GET请求 ===")
+        resp, err := apiClient.Get("/get")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("请求失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">body, err := client.ReadResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("读取响应失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("状态码: %d\n", resp.StatusCode)
+        fmt.Printf("响应体:\n%s\n\n", string(body))
+
+        // 发送POST请求
+        fmt.Println("=== 发送POST请求 ===")
+        postData := []byte(`{"name": "test", "value": 123}`)
+
+        resp, err = apiClient.Post("/post", postData)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("请求失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">body, err = client.ReadResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("读取响应失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("状态码: %d\n", resp.StatusCode)
+        fmt.Printf("响应体:\n%s\n\n", string(body))
+
+        // 使用模板渲染
+        fmt.Println("=== 使用模板渲染 ===")
+        templateJSON := `{
+                "request": {
+                        "method": "POST",
+                        "url": "https://httpbin.org",
+                        "path": "/post",
+                        "headers": {
+                                "Content-Type": "application/json"
+                        }
+                },
+                "body": {
+                        "name": "{{.name}}",
+                        "value": {{.value}},
+                        "items": [{{range $index, $item := .items}}{{if $index}}, {{end}}"{{$item}}"{{end}}]
+                }
+        }`
+
+        templateData := map[string]interface{}{
+                "name":  "template-test",
+                "value": 456,
+                "items": []string{"item1", "item2", "item3"},
+        }
+
+        ctx := context.Background()
+        resp, err = apiClient.ExecuteTemplateJSON(ctx, templateJSON, templateData)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("执行模板失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">body, err = client.ReadResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("读取响应失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("状态码: %d\n", resp.StatusCode)
+        fmt.Printf("响应体:\n%s\n", string(body))</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// 这是导入main包，但实际运行需要链接目标项目的主要实现文件
+// 通过build.sh将相关文件链接到一起编译
+package main
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "net/http"
+        "time"
+
+        "github.com/birdmichael/RenderAPI/pkg/client"
+        "github.com/birdmichael/RenderAPI/pkg/hooks"
+)
+
+// 这个示例展示了如何使用新的文件传入设计
+// 通过直接读取模板文件和数据文件来执行HTTP请求
+func main() <span class="cov0" title="0">{
+        // 创建HTTP客户端
+        httpClient := client.NewClient("https://httpbin.org", 30*time.Second)
+
+        // 设置默认请求头
+        httpClient.SetHeader("X-Custom-Header", "CustomValue")
+
+        // 添加日志钩子
+        loggingHook := &amp;hooks.CustomFunctionHook{
+                BeforeFn: func(req *http.Request) (*http.Request, error) </span><span class="cov0" title="0">{
+                        fmt.Printf("正在发送 %s 请求到 %s\n", req.Method, req.URL.String())
+                        return req, nil
+                }</span>,
+        }
+        <span class="cov0" title="0">responseLogHook := &amp;hooks.CustomFunctionHook{
+                AfterFn: func(resp *http.Response) (*http.Response, error) </span><span class="cov0" title="0">{
+                        fmt.Printf("收到响应: 状态码 %d\n", resp.StatusCode)
+                        return resp, nil
+                }</span>,
+        }
+
+        <span class="cov0" title="0">httpClient.AddBeforeHook(loggingHook)
+        httpClient.AddAfterHook(responseLogHook)
+
+        fmt.Println("=== 示例1: 使用模板文件和数据文件 ===")
+
+        // 使用模板文件和数据文件
+        resp, err := httpClient.ExecuteTemplateWithDataFile(
+                context.Background(),
+                "post_template.json",
+                "post_data.json",
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("请求失败: %v", err)
+        }</span>
+
+        // 读取响应
+        <span class="cov0" title="0">body, err := client.ReadResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("读取响应失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("状态码: %d\n", resp.StatusCode)
+        fmt.Printf("响应体: %s\n", string(body))
+
+        fmt.Println("\n=== 示例2: 使用直接的JSON模板字符串 ===")
+
+        // 使用JSON模板字符串
+        templateJSON := `{
+                "request": {
+                        "method": "POST",
+                        "baseURL": "https://httpbin.org",
+                        "path": "/post",
+                        "headers": {
+                                "Content-Type": "application/json"
+                        }
+                },
+                "body": {
+                        "name": "{{.Name}}",
+                        "email": "{{.Email}}",
+                        "message": "{{.Message}}"
+                }
+        }`
+
+        // 定义数据
+        data := map[string]interface{}{
+                "Name":    "李四",
+                "Email":   "lisi@example.com",
+                "Message": "这是一条测试消息",
+        }
+
+        // 执行模板
+        resp2, err := httpClient.ExecuteTemplateJSON(
+                context.Background(),
+                templateJSON,
+                data,
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("请求失败: %v", err)
+        }</span>
+
+        // 读取响应
+        <span class="cov0" title="0">body2, err := client.ReadResponseBody(resp2)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("读取响应失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("状态码: %d\n", resp2.StatusCode)
+        fmt.Printf("响应体: %s\n", string(body2))</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">// 该示例展示如何使用RenderAPI的内置模板函数
+package main
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "log"
+        "os"
+
+        "github.com/birdmichael/RenderAPI/pkg/template"
+)
+
+func main() <span class="cov0" title="0">{
+        // 创建新的模板引擎
+        engine := template.NewEngine()
+
+        // 使用字符串操作函数的模板
+        stringTemplate := `{
+  "profile": {
+    "username": "{{ toUpper .username }}",
+    "display_name": "{{ title .name }}",
+    "email": "{{ toLower .email }}",
+    "bio": "{{ trim .bio }}",
+    "url_safe_username": "{{ urlEncode .username }}",
+    "html_bio": "{{ htmlEscape .htmlBio }}",
+    "admin_role": "{{ index .roles 1 }}"
+  }
+}`
+
+        // 使用日期和数学函数的模板
+        mathTemplate := `{
+  "calculation": {
+    "num1": {{ .num1 }},
+    "num2": {{ .num2 }},
+    "add": {{ add .num1 .num2 }},
+    "subtract": {{ sub .num1 .num2 }},
+    "multiply": {{ mul .num1 .num2 }},
+    "divide": {{ div .num1 .num2 }},
+    "max": {{ max .num1 .num2 }},
+    "min": {{ min .num1 .num2 }},
+    "round": {{ round .float }},
+    "ceil": {{ ceil .float }},
+    "floor": {{ floor .float }},
+    "random": {{ randInt 1 100 }}
+  }
+}`
+
+        // 使用条件函数的模板
+        conditionTemplate := `{
+  "user": {
+    "name": "{{ .name }}",
+    "nickname": "{{ defaultValue .nickname "匿名用户" }}",
+    "status": "{{ ternary .active "活跃" "不活跃" }}",
+    "access_level": "{{ coalesce .level .default_level "普通用户" }}",
+    "premium": {{ and .active .premium }}
+  }
+}`
+
+        // 添加模板
+        err := engine.AddTemplate("string-template", stringTemplate)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("添加字符串模板失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">err = engine.AddTemplate("math-template", mathTemplate)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("添加数学模板失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">err = engine.AddTemplate("condition-template", conditionTemplate)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("添加条件模板失败: %v", err)
+        }</span>
+
+        // 准备字符串操作示例数据
+        <span class="cov0" title="0">stringData := map[string]interface{}{
+                "username": "john_doe",
+                "name":     "john doe",
+                "email":    "JOHN.DOE@EXAMPLE.COM",
+                "bio":      "  这是一个简介，包含了一些信息  ",
+                "htmlBio":  "&lt;div&gt;这是HTML内容&lt;/div&gt;",
+                "roles":    []string{"user", "admin", "editor"},
+        }
+
+        // 准备数学示例数据
+        mathData := map[string]interface{}{
+                "num1":  10.0,
+                "num2":  5.0,
+                "float": 3.75,
+        }
+
+        // 准备条件示例数据
+        conditionData := map[string]interface{}{
+                "name":          "张三",
+                "nickname":      "",
+                "active":        true,
+                "premium":       true,
+                "level":         nil,
+                "default_level": "高级用户",
+        }
+
+        // 执行字符串模板
+        stringResult, err := engine.Execute("string-template", stringData)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("执行字符串模板失败: %v", err)
+        }</span>
+
+        // 执行数学模板
+        <span class="cov0" title="0">mathResult, err := engine.Execute("math-template", mathData)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("执行数学模板失败: %v", err)
+        }</span>
+
+        // 执行条件模板
+        <span class="cov0" title="0">conditionResult, err := engine.Execute("condition-template", conditionData)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("执行条件模板失败: %v", err)
+        }</span>
+
+        // 格式化输出结果
+        <span class="cov0" title="0">stringJson := formatJSON(stringResult)
+        mathJson := formatJSON(mathResult)
+        conditionJson := formatJSON(conditionResult)
+
+        // 输出结果
+        fmt.Println("=== 字符串操作示例 ===")
+        fmt.Println(stringJson)
+        fmt.Println()
+
+        fmt.Println("=== 数学运算示例 ===")
+        fmt.Println(mathJson)
+        fmt.Println()
+
+        fmt.Println("=== 条件逻辑示例 ===")
+        fmt.Println(conditionJson)
+        fmt.Println()
+
+        // 保存输出到文件
+        err = saveToFile("string_output.json", stringJson)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("保存字符串输出失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">err = saveToFile("math_output.json", mathJson)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("保存数学输出失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">err = saveToFile("condition_output.json", conditionJson)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("保存条件输出失败: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("所有示例已运行完成，输出已保存到JSON文件")</span>
+}
+
+// 格式化JSON
+func formatJSON(data string) string <span class="cov0" title="0">{
+        var out bytes.Buffer
+        err := json.Indent(&amp;out, []byte(data), "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return data
+        }</span>
+        <span class="cov0" title="0">return out.String()</span>
+}
+
+// 保存到文件
+func saveToFile(filename, content string) error <span class="cov0" title="0">{
+        return os.WriteFile(filename, []byte(content), 0644)
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">// Package utils 提供内部工具函数
+package utils
+
+import (
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "os"
+        "strings"
+)
+
+// PrettyJSON 格式化JSON字符串
+func PrettyJSON(data []byte) ([]byte, error) <span class="cov0" title="0">{
+        var obj interface{}
+        err := json.Unmarshal(data, &amp;obj)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return json.MarshalIndent(obj, "", "  ")</span>
+}
+
+// ReadResponseBody 读取HTTP响应体
+func ReadResponseBody(resp *http.Response) ([]byte, error) <span class="cov0" title="0">{
+        defer resp.Body.Close()
+        return io.ReadAll(resp.Body)
+}</span>
+
+// LoadDataFromFile 从文件加载JSON数据
+func LoadDataFromFile(filePath string) (map[string]interface{}, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(filePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var result map[string]interface{}
+        err = json.Unmarshal(data, &amp;result)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// SaveDataToFile 保存数据到文件
+func SaveDataToFile(filePath string, data interface{}) error <span class="cov0" title="0">{
+        jsonData, err := json.MarshalIndent(data, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return os.WriteFile(filePath, jsonData, 0644)</span>
+}
+
+// LogHTTPRequest 记录HTTP请求信息
+func LogHTTPRequest(req *http.Request, body []byte) <span class="cov0" title="0">{
+        fmt.Printf("[请求] %s %s\n", req.Method, req.URL.String())
+
+        if len(req.Header) &gt; 0 </span><span class="cov0" title="0">{
+                fmt.Println("请求头:")
+                for k, v := range req.Header </span><span class="cov0" title="0">{
+                        fmt.Printf("  %s: %s\n", k, strings.Join(v, ", "))
+                }</span>
+        }
+
+        <span class="cov0" title="0">if len(body) &gt; 0 </span><span class="cov0" title="0">{
+                fmt.Println("请求体:")
+                prettyBody, err := PrettyJSON(body)
+                if err == nil </span><span class="cov0" title="0">{
+                        fmt.Println(string(prettyBody))
+                }</span> else<span class="cov0" title="0"> {
+                        fmt.Println(string(body))
+                }</span>
+        }
+}
+
+// LogHTTPResponse 记录HTTP响应信息
+func LogHTTPResponse(resp *http.Response, body []byte) <span class="cov0" title="0">{
+        fmt.Printf("[响应] 状态码: %d\n", resp.StatusCode)
+
+        if len(resp.Header) &gt; 0 </span><span class="cov0" title="0">{
+                fmt.Println("响应头:")
+                for k, v := range resp.Header </span><span class="cov0" title="0">{
+                        fmt.Printf("  %s: %s\n", k, strings.Join(v, ", "))
+                }</span>
+        }
+
+        <span class="cov0" title="0">if len(body) &gt; 0 </span><span class="cov0" title="0">{
+                fmt.Println("响应体:")
+                prettyBody, err := PrettyJSON(body)
+                if err == nil </span><span class="cov0" title="0">{
+                        fmt.Println(string(prettyBody))
+                }</span> else<span class="cov0" title="0"> {
+                        fmt.Println(string(body))
+                }</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">// RenderAPI 主程序入口
+// 提供命令行工具功能，用于发送模板驱动的HTTP请求
+package main
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "flag"
+        "fmt"
+        "io"
+        "net/http"
+        "os"
+
+        "github.com/birdmichael/RenderAPI/pkg/client"
+        "github.com/birdmichael/RenderAPI/pkg/config"
+)
+
+func main() <span class="cov0" title="0">{
+        // 定义命令行参数
+        baseURL := flag.String("url", "", "API基础URL")
+        templateFile := flag.String("template", "", "模板文件路径")
+        dataFile := flag.String("data", "", "数据文件路径")
+        configFile := flag.String("config", "", "配置文件路径")
+        token := flag.String("token", "", "认证令牌")
+        timeout := flag.Int("timeout", 30, "请求超时时间(秒)")
+        verbose := flag.Bool("verbose", false, "启用详细日志")
+        scriptFile := flag.String("script", "", "JavaScript脚本文件路径")
+        method := flag.String("method", "GET", "HTTP方法(不使用模板时)")
+        path := flag.String("path", "", "API路径(不使用模板时)")
+        output := flag.String("output", "", "保存响应到文件")
+        rawData := flag.String("raw", "", "原始请求数据(JSON格式)")
+
+        // 解析命令行参数
+        flag.Parse()
+
+        if *baseURL == "" </span><span class="cov0" title="0">{
+                fmt.Println("错误: 必须指定API基础URL")
+                flag.Usage()
+                os.Exit(1)
+        }</span>
+
+        // 加载配置
+        <span class="cov0" title="0">var cfg *config.Config
+        var err error
+        if *configFile != "" </span><span class="cov0" title="0">{
+                cfg, err = config.LoadConfig(*configFile)
+                if err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("加载配置文件失败: %v\n", err)
+                        os.Exit(1)
+                }</span>
+        } else<span class="cov0" title="0"> {
+                cfg = config.DefaultConfig()
+                cfg.BaseURL = *baseURL
+                cfg.Timeout = *timeout
+                cfg.EnableLogging = *verbose
+        }</span>
+
+        // 创建客户端
+        <span class="cov0" title="0">c := client.NewClient(cfg.BaseURL, cfg.GetTimeout())
+
+        // 设置默认头部
+        for key, value := range cfg.DefaultHeaders </span><span class="cov0" title="0">{
+                c.SetHeader(key, value)
+        }</span>
+
+        // 添加认证令牌
+        <span class="cov0" title="0">if *token != "" </span><span class="cov0" title="0">{
+                // 此处应该使用hooks.NewAuthHook，但暂时使用自定义钩子替代
+                c.AddBeforeHook(&amp;authHook{token: *token})
+        }</span> else<span class="cov0" title="0"> if cfg.AuthToken != "" </span><span class="cov0" title="0">{
+                c.AddBeforeHook(&amp;authHook{token: cfg.AuthToken})
+        }</span>
+
+        // 添加脚本钩子
+        <span class="cov0" title="0">if *scriptFile != "" </span><span class="cov0" title="0">{
+                if err := c.AddJSHookFromFile(*scriptFile, false, 30); err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("添加脚本钩子失败: %v\n", *scriptFile)
+                }</span> else<span class="cov0" title="0"> {
+                        fmt.Printf("已添加脚本钩子: %s\n", *scriptFile)
+                }</span>
+        }
+
+        // 添加日志钩子
+        <span class="cov0" title="0">if *verbose || cfg.EnableLogging </span><span class="cov0" title="0">{
+                c.AddBeforeHook(&amp;loggingHook{})
+                c.AddAfterHook(&amp;responseLogHook{})
+        }</span>
+
+        // 处理请求
+        <span class="cov0" title="0">var resp *http.Response
+        ctx := context.Background()
+
+        if *templateFile != "" </span><span class="cov0" title="0">{
+                // 使用模板文件
+                if *dataFile != "" </span><span class="cov0" title="0">{
+                        fmt.Println("使用模板和数据文件发送请求...")
+                        resp, err = c.ExecuteTemplateWithDataFile(ctx, *templateFile, *dataFile)
+                }</span> else<span class="cov0" title="0"> if *rawData != "" </span><span class="cov0" title="0">{
+                        // 解析原始数据
+                        var data map[string]interface{}
+                        if err := json.Unmarshal([]byte(*rawData), &amp;data); err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("解析JSON数据失败: %v\n", err)
+                                os.Exit(1)
+                        }</span>
+                        <span class="cov0" title="0">fmt.Println("使用模板和提供的数据发送请求...")
+                        resp, err = c.ExecuteTemplateFile(ctx, *templateFile, data)</span>
+                } else<span class="cov0" title="0"> {
+                        fmt.Println("错误: 使用模板文件时必须提供数据文件或原始数据")
+                        flag.Usage()
+                        os.Exit(1)
+                }</span>
+        } else<span class="cov0" title="0"> if *path != "" </span><span class="cov0" title="0">{
+                // 使用原始HTTP方法
+                fullPath := cfg.BaseURL + *path
+                fmt.Printf("发送 %s 请求到 %s...\n", *method, fullPath)
+
+                switch *method </span>{
+                case "GET":<span class="cov0" title="0">
+                        resp, err = c.Get(*path)</span>
+                case "POST":<span class="cov0" title="0">
+                        var body []byte
+                        if *rawData != "" </span><span class="cov0" title="0">{
+                                body = []byte(*rawData)
+                        }</span>
+                        <span class="cov0" title="0">resp, err = c.Post(*path, body)</span>
+                case "PUT":<span class="cov0" title="0">
+                        var body []byte
+                        if *rawData != "" </span><span class="cov0" title="0">{
+                                body = []byte(*rawData)
+                        }</span>
+                        <span class="cov0" title="0">resp, err = c.Put(*path, body)</span>
+                case "DELETE":<span class="cov0" title="0">
+                        resp, err = c.Delete(*path)</span>
+                default:<span class="cov0" title="0">
+                        fmt.Printf("不支持的HTTP方法: %s\n", *method)
+                        os.Exit(1)</span>
+                }
+        } else<span class="cov0" title="0"> {
+                fmt.Println("错误: 必须指定模板文件或API路径")
+                flag.Usage()
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("请求失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        // 处理响应
+        <span class="cov0" title="0">defer resp.Body.Close()
+        fmt.Printf("状态码: %d\n", resp.StatusCode)
+
+        // 读取响应体
+        responseBody, err := readResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("读取响应失败: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        // 保存响应
+        <span class="cov0" title="0">if *output != "" </span><span class="cov0" title="0">{
+                err := os.WriteFile(*output, []byte(responseBody), 0644)
+                if err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("保存响应到文件失败: %v\n", err)
+                        os.Exit(1)
+                }</span>
+                <span class="cov0" title="0">fmt.Printf("响应已保存到文件: %s\n", *output)</span>
+        } else<span class="cov0" title="0"> {
+                // 尝试美化JSON
+                var jsonData interface{}
+                if err := json.Unmarshal([]byte(responseBody), &amp;jsonData); err == nil </span><span class="cov0" title="0">{
+                        prettyJSON, err := json.MarshalIndent(jsonData, "", "  ")
+                        if err == nil </span><span class="cov0" title="0">{
+                                fmt.Println("响应内容:")
+                                fmt.Println(string(prettyJSON))
+                                return
+                        }</span>
+                }
+
+                // 如果不是JSON，直接输出
+                <span class="cov0" title="0">fmt.Println("响应内容:")
+                fmt.Println(responseBody)</span>
+        }
+}
+
+// 读取响应体
+func readResponseBody(resp *http.Response) (string, error) <span class="cov0" title="0">{
+        bodyBytes, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        // 重置响应体，以便后续可能的处理
+        <span class="cov0" title="0">resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+        return string(bodyBytes), nil</span>
+}
+
+// 自定义认证钩子
+type authHook struct {
+        token string
+}
+
+func (h *authHook) Before(req *http.Request) (*http.Request, error) <span class="cov0" title="0">{
+        req.Header.Set("Authorization", "Bearer "+h.token)
+        return req, nil
+}</span>
+
+// BeforeAsync 异步添加认证信息
+func (h *authHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov0" title="0">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov0" title="0">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov0" title="0">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov0" title="0">return reqChan, errChan</span>
+}
+
+// 自定义日志钩子
+type loggingHook struct{}
+
+func (h *loggingHook) Before(req *http.Request) (*http.Request, error) <span class="cov0" title="0">{
+        fmt.Printf("发送 %s 请求到 %s\n", req.Method, req.URL.String())
+        return req, nil
+}</span>
+
+// BeforeAsync 异步记录请求信息
+func (h *loggingHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov0" title="0">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov0" title="0">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov0" title="0">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov0" title="0">return reqChan, errChan</span>
+}
+
+// 响应日志钩子
+type responseLogHook struct{}
+
+func (h *responseLogHook) After(resp *http.Response) (*http.Response, error) <span class="cov0" title="0">{
+        fmt.Printf("收到响应: 状态码 %d\n", resp.StatusCode)
+        return resp, nil
+}</span>
+
+// AfterAsync 异步记录响应信息
+func (h *responseLogHook) AfterAsync(resp *http.Response) (chan *http.Response, chan error) <span class="cov0" title="0">{
+        respChan := make(chan *http.Response, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov0" title="0">{
+                modifiedResp, err := h.After(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov0" title="0">respChan &lt;- modifiedResp</span>
+        }()
+
+        <span class="cov0" title="0">return respChan, errChan</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">// Package client 提供HTTP客户端功能，支持模板驱动的请求
+package client
+
+import (
+        "bytes"
+        "context"
+        "crypto/sha256"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "os"
+        "strings"
+        "sync"
+        "time"
+
+        "github.com/birdmichael/RenderAPI/pkg/hooks"
+        "github.com/birdmichael/RenderAPI/pkg/template"
+)
+
+// CachedResponse 缓存的响应
+type CachedResponse struct {
+        Response   *http.Response
+        Body       []byte
+        ExpireTime time.Time
+}
+
+// Client 提供HTTP请求功能
+type Client struct {
+        client         *http.Client
+        baseURL        string
+        headers        map[string]string
+        beforeHook     []hooks.BeforeRequestHook
+        afterHook      []hooks.AfterResponseHook
+        templateEngine *template.Engine
+        cache          map[string]*CachedResponse // 缓存
+        cacheMutex     sync.RWMutex               // 缓存锁
+}
+
+// NewClient 创建一个新的HTTP客户端
+func NewClient(baseURL string, timeout time.Duration) *Client <span class="cov9" title="6">{
+        return &amp;Client{
+                client: &amp;http.Client{
+                        Timeout: timeout,
+                },
+                baseURL:        baseURL,
+                headers:        make(map[string]string),
+                templateEngine: template.NewEngine(),
+                cache:          make(map[string]*CachedResponse),
+        }
+}</span>
+
+// SetHeader 设置HTTP请求头
+func (c *Client) SetHeader(key, value string) <span class="cov4" title="2">{
+        c.headers[key] = value
+}</span>
+
+// AddBeforeHook 添加请求前钩子
+func (c *Client) AddBeforeHook(hook hooks.BeforeRequestHook) <span class="cov0" title="0">{
+        c.beforeHook = append(c.beforeHook, hook)
+}</span>
+
+// AddAfterHook 添加响应后钩子
+func (c *Client) AddAfterHook(hook hooks.AfterResponseHook) <span class="cov0" title="0">{
+        c.afterHook = append(c.afterHook, hook)
+}</span>
+
+// AddJSHookFromFile 从文件添加JavaScript钩子
+func (c *Client) AddJSHookFromFile(scriptFile string, isAsync bool, timeoutSeconds int) error <span class="cov0" title="0">{
+        hook, err := hooks.NewJSHookFromFile(scriptFile, isAsync, timeoutSeconds)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">c.AddBeforeHook(hook)
+        return nil</span>
+}
+
+// AddJSHookFromString 从字符串添加JavaScript钩子
+func (c *Client) AddJSHookFromString(scriptContent string, isAsync bool, timeoutSeconds int) error <span class="cov0" title="0">{
+        hook, err := hooks.NewJSHookFromString(scriptContent, isAsync, timeoutSeconds)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">c.AddBeforeHook(hook)
+        return nil</span>
+}
+
+// AddCommandHook 添加命令行执行钩子
+func (c *Client) AddCommandHook(command string, isAsync bool, timeoutSeconds int) <span class="cov0" title="0">{
+        hook := hooks.NewCommandHook(command, timeoutSeconds, isAsync)
+        c.AddBeforeHook(hook)
+}</span>
+
+// GetTemplateEngine 获取模板引擎
+func (c *Client) GetTemplateEngine() *template.Engine <span class="cov0" title="0">{
+        return c.templateEngine
+}</span>
+
+// ExecuteTemplateFile 使用模板文件执行请求
+func (c *Client) ExecuteTemplateFile(ctx context.Context, templateFile string, data interface{}) (*http.Response, error) <span class="cov0" title="0">{
+        // 加载模板文件
+        tmplContent, err := os.ReadFile(templateFile)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("读取模板文件失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return c.ExecuteTemplateJSON(ctx, string(tmplContent), data)</span>
+}
+
+// ExecuteTemplateWithDataFile 使用模板文件和数据文件执行请求
+func (c *Client) ExecuteTemplateWithDataFile(ctx context.Context, templateFile, dataFile string) (*http.Response, error) <span class="cov1" title="1">{
+        // 加载模板文件
+        tmplContent, err := os.ReadFile(templateFile)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("读取模板文件失败: %w", err)
+        }</span>
+
+        // 加载数据文件
+        <span class="cov1" title="1">dataContent, err := os.ReadFile(dataFile)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("读取数据文件失败: %w", err)
+        }</span>
+
+        // 解析数据
+        <span class="cov1" title="1">var data interface{}
+        if err := json.Unmarshal(dataContent, &amp;data); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("解析数据文件失败: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return c.ExecuteTemplateJSON(ctx, string(tmplContent), data)</span>
+}
+
+// ExecuteTemplateJSON 使用JSON字符串模板执行请求
+func (c *Client) ExecuteTemplateJSON(ctx context.Context, templateJSON string, data interface{}) (*http.Response, error) <span class="cov4" title="2">{
+        // 解析模板定义
+        var tmplDef struct {
+                Request struct {
+                        Method  string            `json:"method"`
+                        BaseURL string            `json:"baseURL"`
+                        Path    string            `json:"path"`
+                        Headers map[string]string `json:"headers"`
+                        Timeout int               `json:"timeout"`
+                } `json:"request"`
+                Body        map[string]interface{} `json:"body"`
+                BeforeHooks []hooks.HookDefinition `json:"beforeHooks"`
+                AfterHooks  []hooks.HookDefinition `json:"afterHooks"`
+                Caching     struct {
+                        Enabled    bool   `json:"enabled"`
+                        TTL        int    `json:"ttl"`
+                        KeyPattern string `json:"keyPattern"`
+                } `json:"caching"`
+                Retry struct {
+                        Enabled       bool `json:"enabled"`
+                        MaxAttempts   int  `json:"maxAttempts"`
+                        InitialDelay  int  `json:"initialDelay"`
+                        BackoffFactor int  `json:"backoffFactor"`
+                } `json:"retry"`
+        }
+
+        if err := json.Unmarshal([]byte(templateJSON), &amp;tmplDef); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("解析模板定义失败: %w", err)
+        }</span>
+
+        // 生成唯一模板ID
+        <span class="cov4" title="2">templateID := fmt.Sprintf("template_%d", time.Now().UnixNano())
+
+        // 添加正文模板
+        bodyTemplate, err := json.Marshal(tmplDef.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("序列化请求体模板失败: %w", err)
+        }</span>
+
+        <span class="cov4" title="2">if err := c.templateEngine.AddTemplate(templateID, string(bodyTemplate)); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("添加请求体模板失败: %w", err)
+        }</span>
+
+        // 渲染请求体
+        <span class="cov4" title="2">renderedBody, err := c.templateEngine.RenderJSONTemplate(templateID, data)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("渲染请求体失败: %w", err)
+        }</span>
+
+        // 确定URL和路径
+        <span class="cov4" title="2">baseURL := c.baseURL
+        if tmplDef.Request.BaseURL != "" </span><span class="cov0" title="0">{
+                baseURL = tmplDef.Request.BaseURL
+        }</span>
+
+        // 发送请求
+        <span class="cov4" title="2">method := tmplDef.Request.Method
+        if method == "" </span><span class="cov0" title="0">{
+                method = "GET"
+        }</span>
+
+        // 合并请求头
+        <span class="cov4" title="2">headers := make(map[string]string)
+        for k, v := range c.headers </span><span class="cov0" title="0">{
+                headers[k] = v
+        }</span>
+        <span class="cov4" title="2">for k, v := range tmplDef.Request.Headers </span><span class="cov4" title="2">{
+                headers[k] = v
+        }</span>
+
+        // 创建请求对象
+        <span class="cov4" title="2">req, err := http.NewRequestWithContext(
+                ctx,
+                method,
+                baseURL+tmplDef.Request.Path,
+                bytes.NewReader(renderedBody),
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("创建HTTP请求失败: %w", err)
+        }</span>
+
+        // 设置请求头
+        <span class="cov4" title="2">for key, value := range headers </span><span class="cov4" title="2">{
+                // 使用模板引擎渲染头部值
+                if err := c.templateEngine.AddTemplate(templateID+"_header_"+key, value); err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("添加头部模板失败: %w", err)
+                }</span>
+                <span class="cov4" title="2">renderedValue, err := c.templateEngine.Execute(templateID+"_header_"+key, data)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("渲染请求头值失败: %w", err)
+                }</span>
+                <span class="cov4" title="2">req.Header.Set(key, renderedValue)</span>
+        }
+
+        // 设置Content-Type（如果未指定）
+        <span class="cov4" title="2">if req.Header.Get("Content-Type") == "" &amp;&amp; (method == "POST" || method == "PUT" || method == "PATCH") </span><span class="cov0" title="0">{
+                req.Header.Set("Content-Type", "application/json")
+        }</span>
+
+        // 处理模板中定义的前置钩子
+        <span class="cov4" title="2">for _, hookDef := range tmplDef.BeforeHooks </span><span class="cov0" title="0">{
+                hook, err := hooks.CreateHookFromDefinition(&amp;hookDef)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("创建请求前钩子失败: %w", err)
+                }</span>
+
+                // 根据接口类型添加钩子
+                <span class="cov0" title="0">beforeHook, ok := hook.(hooks.BeforeRequestHook)
+                if !ok </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("钩子类型不是请求前钩子: %T", hook)
+                }</span>
+
+                // 执行请求前钩子
+                <span class="cov0" title="0">req, err = beforeHook.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("执行请求前钩子失败: %w", err)
+                }</span>
+        }
+
+        // 应用全局钩子（在模板钩子之后应用，可以覆盖模板钩子的设置）
+        <span class="cov4" title="2">for _, hook := range c.beforeHook </span><span class="cov0" title="0">{
+                req, err = hook.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("执行请求前钩子失败: %w", err)
+                }</span>
+        }
+
+        // 设置超时
+        <span class="cov4" title="2">clientCopy := *c.client
+        if tmplDef.Request.Timeout &gt; 0 </span><span class="cov0" title="0">{
+                clientCopy.Timeout = time.Duration(tmplDef.Request.Timeout) * time.Second
+        }</span>
+
+        // 处理缓存逻辑
+        <span class="cov4" title="2">if tmplDef.Caching.Enabled </span><span class="cov0" title="0">{
+                // 读取请求体
+                var reqBodyBytes []byte
+                if req.Body != nil </span><span class="cov0" title="0">{
+                        reqBodyBytes, _ = hooks.ReadRequestBody(req)
+                        // 重新设置请求体
+                        req.Body = io.NopCloser(bytes.NewReader(reqBodyBytes))
+                }</span>
+
+                // 生成缓存键
+                <span class="cov0" title="0">cacheKey := tmplDef.Caching.KeyPattern
+                if cacheKey == "" </span><span class="cov0" title="0">{
+                        // 使用请求URL和正文作为缓存键
+                        cacheKey = req.URL.String()
+                        if len(reqBodyBytes) &gt; 0 </span><span class="cov0" title="0">{
+                                bodyHash := fmt.Sprintf("%x", sha256.Sum256(reqBodyBytes))
+                                cacheKey = cacheKey + ":" + bodyHash
+                        }</span>
+                } else<span class="cov0" title="0"> {
+                        // 使用模板渲染缓存键模式
+                        renderedKey, err := c.templateEngine.Execute(templateID+"_cache_key", data)
+                        if err == nil &amp;&amp; renderedKey != "" </span><span class="cov0" title="0">{
+                                cacheKey = renderedKey
+                        }</span>
+                }
+
+                // 检查缓存
+                <span class="cov0" title="0">cachedResp, cachedBody, found := c.getFromCache(req, reqBodyBytes)
+                if found </span><span class="cov0" title="0">{
+                        // 重新设置响应体
+                        cachedResp.Body = io.NopCloser(bytes.NewReader(cachedBody))
+
+                        // 应用响应后钩子
+                        for _, hook := range c.afterHook </span><span class="cov0" title="0">{
+                                cachedResp, err = hook.After(cachedResp)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return nil, fmt.Errorf("执行响应后钩子失败: %w", err)
+                                }</span>
+                        }
+                        <span class="cov0" title="0">return cachedResp, nil</span>
+                }
+        }
+
+        // 发送请求并处理重试逻辑
+        <span class="cov4" title="2">var resp *http.Response
+        if tmplDef.Retry.Enabled &amp;&amp; tmplDef.Retry.MaxAttempts &gt; 0 </span><span class="cov0" title="0">{
+                resp, err = c.doWithRetry(req, &amp;clientCopy, tmplDef.Retry.MaxAttempts,
+                        tmplDef.Retry.InitialDelay, tmplDef.Retry.BackoffFactor)
+        }</span> else<span class="cov4" title="2"> {
+                resp, err = clientCopy.Do(req)
+        }</span>
+
+        <span class="cov4" title="2">if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("发送HTTP请求失败: %w", err)
+        }</span>
+
+        // 处理模板中定义的后置钩子
+        <span class="cov4" title="2">for _, hookDef := range tmplDef.AfterHooks </span><span class="cov0" title="0">{
+                hook, err := hooks.CreateHookFromDefinition(&amp;hookDef)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("创建响应后钩子失败: %w", err)
+                }</span>
+
+                // 根据接口类型添加钩子
+                <span class="cov0" title="0">afterHook, ok := hook.(hooks.AfterResponseHook)
+                if !ok </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("钩子类型不是响应后钩子: %T", hook)
+                }</span>
+
+                // 执行响应后钩子
+                <span class="cov0" title="0">resp, err = afterHook.After(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("执行响应后钩子失败: %w", err)
+                }</span>
+        }
+
+        // 应用全局响应后钩子
+        <span class="cov4" title="2">for _, hook := range c.afterHook </span><span class="cov0" title="0">{
+                resp, err = hook.After(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("执行响应后钩子失败: %w", err)
+                }</span>
+        }
+
+        // 处理缓存保存
+        <span class="cov4" title="2">if tmplDef.Caching.Enabled &amp;&amp; resp.StatusCode &gt;= 200 &amp;&amp; resp.StatusCode &lt; 300 </span><span class="cov0" title="0">{
+                // 读取请求体
+                var reqBodyBytes []byte
+                if req.Body != nil </span><span class="cov0" title="0">{
+                        reqBodyBytes, _ = hooks.ReadRequestBody(req)
+                }</span>
+
+                // 读取响应体
+                <span class="cov0" title="0">respBodyBytes, err := ReadResponseBody(resp)
+                if err == nil </span><span class="cov0" title="0">{
+                        // 重新设置响应体
+                        resp.Body = io.NopCloser(bytes.NewReader(respBodyBytes))
+
+                        // 保存到缓存
+                        c.saveToCache(req, reqBodyBytes, resp, respBodyBytes, time.Duration(tmplDef.Caching.TTL)*time.Second)
+                }</span>
+        }
+
+        <span class="cov4" title="2">return resp, nil</span>
+}
+
+// doWithRetry 执行带有重试逻辑的请求
+func (c *Client) doWithRetry(req *http.Request, client *http.Client, maxAttempts, initialDelay, backoffFactor int) (*http.Response, error) <span class="cov0" title="0">{
+        var resp *http.Response
+        var err error
+        delay := initialDelay
+
+        // 如果没有设置适当的值，使用默认值
+        if maxAttempts &lt;= 0 </span><span class="cov0" title="0">{
+                maxAttempts = 3
+        }</span>
+        <span class="cov0" title="0">if initialDelay &lt;= 0 </span><span class="cov0" title="0">{
+                initialDelay = 1000 // 1秒
+        }</span>
+        <span class="cov0" title="0">if backoffFactor &lt;= 0 </span><span class="cov0" title="0">{
+                backoffFactor = 2
+        }</span>
+
+        <span class="cov0" title="0">for attempt := 0; attempt &lt; maxAttempts; attempt++ </span><span class="cov0" title="0">{
+                // 创建请求体的副本
+                reqCopy := c.cloneRequest(req)
+                resp, err = client.Do(reqCopy)
+
+                // 成功或不可恢复的错误，直接返回
+                if err == nil || !c.isRetryableError(err) </span><span class="cov0" title="0">{
+                        return resp, err
+                }</span>
+
+                // 最后一次尝试失败，直接返回错误
+                <span class="cov0" title="0">if attempt == maxAttempts-1 </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("最大重试次数(%d)已用尽: %w", maxAttempts, err)
+                }</span>
+
+                // 等待一段时间后重试
+                <span class="cov0" title="0">time.Sleep(time.Duration(delay) * time.Millisecond)
+
+                // 计算下一次延迟（指数退避）
+                delay *= backoffFactor</span>
+        }
+
+        <span class="cov0" title="0">return resp, err</span>
+}
+
+// cloneRequest 创建请求的深度副本
+func (c *Client) cloneRequest(req *http.Request) *http.Request <span class="cov0" title="0">{
+        // 创建新的上下文，保持原始超时设置
+        reqCopy := req.Clone(req.Context())
+
+        // 如果有请求体，需要重新读取和设置
+        if req.Body != nil </span><span class="cov0" title="0">{
+                // 读取原始请求体
+                bodyBytes, err := hooks.ReadRequestBody(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        // 如果读取失败，返回无请求体的副本
+                        reqCopy.Body = nil
+                        reqCopy.ContentLength = 0
+                        return reqCopy
+                }</span>
+
+                // 为副本设置相同的请求体
+                <span class="cov0" title="0">reqCopy.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+                reqCopy.ContentLength = int64(len(bodyBytes))</span>
+        }
+
+        <span class="cov0" title="0">return reqCopy</span>
+}
+
+// isRetryableError 判断错误是否可重试
+func (c *Client) isRetryableError(err error) bool <span class="cov0" title="0">{
+        // 网络连接错误通常是可重试的
+        if err != nil </span><span class="cov0" title="0">{
+                // 检查常见的临时网络错误
+                // 这些错误通常是因为网络故障、服务器过载等暂时性问题
+                errMsg := err.Error()
+
+                // 常见的可重试错误模式
+                retryablePatterns := []string{
+                        "connection refused",
+                        "connection reset",
+                        "timeout",
+                        "temporary failure",
+                        "EOF",
+                        "i/o timeout",
+                        "too many open files",
+                        "no such host",
+                }
+
+                for _, pattern := range retryablePatterns </span><span class="cov0" title="0">{
+                        if strings.Contains(strings.ToLower(errMsg), pattern) </span><span class="cov0" title="0">{
+                                return true
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return false</span>
+}
+
+// Request 发送HTTP请求
+func (c *Client) Request(method, path string, body []byte) (*http.Response, error) <span class="cov10" title="7">{
+        url := c.baseURL + path
+        req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("创建请求失败: %w", err)
+        }</span>
+
+        // 设置请求头
+        <span class="cov10" title="7">for key, value := range c.headers </span><span class="cov4" title="2">{
+                req.Header.Set(key, value)
+        }</span>
+
+        // 执行前置钩子
+        <span class="cov10" title="7">for _, hook := range c.beforeHook </span><span class="cov0" title="0">{
+                req, err = hook.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("前置钩子执行失败: %w", err)
+                }</span>
+        }
+
+        // 发送请求
+        <span class="cov10" title="7">resp, err := c.client.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("请求失败: %w", err)
+        }</span>
+
+        // 执行后置钩子
+        <span class="cov10" title="7">for _, hook := range c.afterHook </span><span class="cov0" title="0">{
+                resp, err = hook.After(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        resp.Body.Close()
+                        return nil, fmt.Errorf("后置钩子执行失败: %w", err)
+                }</span>
+        }
+
+        <span class="cov10" title="7">return resp, nil</span>
+}
+
+// Get 发送GET请求
+func (c *Client) Get(path string) (*http.Response, error) <span class="cov7" title="4">{
+        return c.Request(http.MethodGet, path, nil)
+}</span>
+
+// Post 发送POST请求
+func (c *Client) Post(path string, body []byte) (*http.Response, error) <span class="cov1" title="1">{
+        return c.Request(http.MethodPost, path, body)
+}</span>
+
+// Put 发送PUT请求
+func (c *Client) Put(path string, body []byte) (*http.Response, error) <span class="cov1" title="1">{
+        return c.Request(http.MethodPut, path, body)
+}</span>
+
+// Delete 发送DELETE请求
+func (c *Client) Delete(path string) (*http.Response, error) <span class="cov1" title="1">{
+        return c.Request(http.MethodDelete, path, nil)
+}</span>
+
+// ReadResponseBody 读取响应主体
+func ReadResponseBody(resp *http.Response) ([]byte, error) <span class="cov6" title="3">{
+        defer resp.Body.Close()
+        return io.ReadAll(resp.Body)
+}</span>
+
+// Response 封装HTTP响应
+type Response struct {
+        StatusCode int
+        Headers    map[string]string
+        Body       []byte
+}
+
+// NewResponseFromHTTP 从http.Response创建Response
+func NewResponseFromHTTP(resp *http.Response) (*Response, error) <span class="cov0" title="0">{
+        body, err := ReadResponseBody(resp)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">headers := make(map[string]string)
+        for k, v := range resp.Header </span><span class="cov0" title="0">{
+                if len(v) &gt; 0 </span><span class="cov0" title="0">{
+                        headers[k] = v[0]
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;Response{
+                StatusCode: resp.StatusCode,
+                Headers:    headers,
+                Body:       body,
+        }, nil</span>
+}
+
+// String 返回响应体的字符串表示
+func (r *Response) String() string <span class="cov0" title="0">{
+        return string(r.Body)
+}</span>
+
+// JSON 返回响应体的格式化JSON字符串
+func (r *Response) JSON() (string, error) <span class="cov0" title="0">{
+        var data interface{}
+        if err := json.Unmarshal(r.Body, &amp;data); err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">formattedJSON, err := json.MarshalIndent(data, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return string(formattedJSON), nil</span>
+}
+
+// generateCacheKey 生成缓存键
+func (c *Client) generateCacheKey(req *http.Request, body []byte) string <span class="cov0" title="0">{
+        h := sha256.New()
+        io.WriteString(h, req.URL.String())
+        h.Write(body)
+        return fmt.Sprintf("%x", h.Sum(nil))
+}</span>
+
+// getFromCache 从缓存中获取响应
+func (c *Client) getFromCache(req *http.Request, body []byte) (*http.Response, []byte, bool) <span class="cov0" title="0">{
+        c.cacheMutex.RLock()
+        defer c.cacheMutex.RUnlock()
+
+        key := c.generateCacheKey(req, body)
+        if cached, ok := c.cache[key]; ok </span><span class="cov0" title="0">{
+                if time.Now().Before(cached.ExpireTime) </span><span class="cov0" title="0">{
+                        // 复制响应以确保安全返回
+                        respCopy := *cached.Response
+                        bodyCopy := make([]byte, len(cached.Body))
+                        copy(bodyCopy, cached.Body)
+                        return &amp;respCopy, bodyCopy, true
+                }</span>
+                // 缓存已过期，删除
+                <span class="cov0" title="0">delete(c.cache, key)</span>
+        }
+        <span class="cov0" title="0">return nil, nil, false</span>
+}
+
+// saveToCache 保存响应到缓存
+func (c *Client) saveToCache(req *http.Request, reqBody []byte, resp *http.Response, respBody []byte, duration time.Duration) <span class="cov0" title="0">{
+        c.cacheMutex.Lock()
+        defer c.cacheMutex.Unlock()
+
+        // 只缓存成功的响应
+        if resp.StatusCode &gt;= 200 &amp;&amp; resp.StatusCode &lt; 300 </span><span class="cov0" title="0">{
+                key := c.generateCacheKey(req, reqBody)
+                c.cache[key] = &amp;CachedResponse{
+                        Response:   resp,
+                        Body:       respBody,
+                        ExpireTime: time.Now().Add(duration),
+                }
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">// Package config 提供配置文件管理功能
+package config
+
+import (
+        "encoding/json"
+        "fmt"
+        "os"
+        "time"
+)
+
+// Config 存储应用程序配置
+type Config struct {
+        BaseURL             string            `json:"base_url"`
+        DefaultHeaders      map[string]string `json:"default_headers"`
+        Timeout             int               `json:"timeout"`
+        EnableLogging       bool              `json:"enable_logging"`
+        AuthToken           string            `json:"auth_token"`
+        TemplatesFolderPath string            `json:"templates_folder_path"`
+}
+
+// LoadConfig 从文件加载配置
+func LoadConfig(filePath string) (*Config, error) <span class="cov10" title="3">{
+        data, err := os.ReadFile(filePath)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("读取配置文件失败: %w", err)
+        }</span>
+
+        <span class="cov6" title="2">var config Config
+        err = json.Unmarshal(data, &amp;config)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("解析配置文件失败: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return &amp;config, nil</span>
+}
+
+// GetTimeout 获取超时时间
+func (c *Config) GetTimeout() time.Duration <span class="cov1" title="1">{
+        return time.Duration(c.Timeout) * time.Second
+}</span>
+
+// SaveConfig 保存配置到文件
+func (c *Config) SaveConfig(filePath string) error <span class="cov1" title="1">{
+        data, err := json.MarshalIndent(c, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("序列化配置失败: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">err = os.WriteFile(filePath, data, 0644)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("写入配置文件失败: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+// DefaultConfig 创建默认配置
+func DefaultConfig() *Config <span class="cov1" title="1">{
+        return &amp;Config{
+                BaseURL: "http://localhost:8080",
+                DefaultHeaders: map[string]string{
+                        "Content-Type": "application/json",
+                        "User-Agent":   "RenderAPI/1.0",
+                },
+                Timeout:       30,
+                EnableLogging: true,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package hooks
+
+import (
+        "bytes"
+        "context"
+        "fmt"
+        "io"
+        "net/http"
+        "os/exec"
+        "time"
+)
+
+// CommandHook 命令行执行钩子
+type CommandHook struct {
+        Command string
+        Timeout time.Duration
+        IsAsync bool
+}
+
+// NewCommandHook 创建一个新的命令行执行钩子
+func NewCommandHook(command string, timeoutSeconds int, isAsync bool) *CommandHook <span class="cov10" title="6">{
+        return &amp;CommandHook{
+                Command: command,
+                Timeout: time.Duration(timeoutSeconds) * time.Second,
+                IsAsync: isAsync,
+        }
+}</span>
+
+// Before 执行命令行命令处理请求
+func (h *CommandHook) Before(req *http.Request) (*http.Request, error) <span class="cov7" title="4">{
+        if h.IsAsync </span><span class="cov0" title="0">{
+                reqChan, errChan := h.BeforeAsync(req)
+                select </span>{
+                case modifiedReq := &lt;-reqChan:<span class="cov0" title="0">
+                        return modifiedReq, nil</span>
+                case err := &lt;-errChan:<span class="cov0" title="0">
+                        return req, err</span>
+                case &lt;-time.After(h.Timeout):<span class="cov0" title="0">
+                        return req, fmt.Errorf("命令执行超时")</span>
+                }
+        }
+
+        // 同步执行命令
+        <span class="cov7" title="4">return h.executeCommand(req)</span>
+}
+
+// BeforeAsync 异步执行命令行命令处理请求
+func (h *CommandHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov4" title="2">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov4" title="2">{
+                modifiedReq, err := h.executeCommand(req)
+                if err != nil </span><span class="cov1" title="1">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov1" title="1">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov4" title="2">return reqChan, errChan</span>
+}
+
+// executeCommand 执行命令行命令
+func (h *CommandHook) executeCommand(req *http.Request) (*http.Request, error) <span class="cov10" title="6">{
+        // 创建上下文，设置超时
+        ctx, cancel := context.WithTimeout(context.Background(), h.Timeout)
+        defer cancel()
+
+        // 准备命令
+        cmd := exec.CommandContext(ctx, "sh", "-c", h.Command)
+
+        // 如果有请求体，通过stdin传递
+        if req.Body != nil </span><span class="cov6" title="3">{
+                bodyBytes, err := ReadRequestBody(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        return req, fmt.Errorf("读取请求体失败: %w", err)
+                }</span>
+
+                // 将请求体传递给命令的标准输入
+                <span class="cov6" title="3">cmd.Stdin = bytes.NewBuffer(bodyBytes)</span>
+        }
+
+        // 捕获标准输出和错误
+        <span class="cov10" title="6">var stdout, stderr bytes.Buffer
+        cmd.Stdout = &amp;stdout
+        cmd.Stderr = &amp;stderr
+
+        // 执行命令
+        if err := cmd.Run(); err != nil </span><span class="cov7" title="4">{
+                return req, fmt.Errorf("命令执行失败: %v, stderr: %s", err, stderr.String())
+        }</span>
+
+        // 如果有输出，使用它来替换请求体
+        <span class="cov4" title="2">if stdout.Len() &gt; 0 </span><span class="cov4" title="2">{
+                updatedReq, err := ReplaceRequestBody(req, stdout.Bytes())
+                if err != nil </span><span class="cov0" title="0">{
+                        return req, fmt.Errorf("更新请求体失败: %w", err)
+                }</span>
+                <span class="cov4" title="2">return updatedReq, nil</span>
+        }
+
+        <span class="cov0" title="0">return req, nil</span>
+}
+
+// CommandResponseHook 命令行执行响应钩子
+type CommandResponseHook struct {
+        Command string
+        Timeout time.Duration
+        IsAsync bool
+}
+
+// NewCommandResponseHook 创建一个新的命令行执行响应钩子
+func NewCommandResponseHook(command string, timeoutSeconds int, isAsync bool) *CommandResponseHook <span class="cov4" title="2">{
+        return &amp;CommandResponseHook{
+                Command: command,
+                Timeout: time.Duration(timeoutSeconds) * time.Second,
+                IsAsync: isAsync,
+        }
+}</span>
+
+// After 执行命令行命令处理响应
+func (h *CommandResponseHook) After(resp *http.Response) (*http.Response, error) <span class="cov1" title="1">{
+        if h.IsAsync </span><span class="cov0" title="0">{
+                respChan, errChan := h.AfterAsync(resp)
+                select </span>{
+                case modifiedResp := &lt;-respChan:<span class="cov0" title="0">
+                        return modifiedResp, nil</span>
+                case err := &lt;-errChan:<span class="cov0" title="0">
+                        return resp, err</span>
+                case &lt;-time.After(h.Timeout):<span class="cov0" title="0">
+                        return resp, fmt.Errorf("命令执行超时")</span>
+                }
+        }
+
+        // 同步执行命令
+        <span class="cov1" title="1">return h.executeCommand(resp)</span>
+}
+
+// AfterAsync 异步执行命令行命令处理响应
+func (h *CommandResponseHook) AfterAsync(resp *http.Response) (chan *http.Response, chan error) <span class="cov1" title="1">{
+        respChan := make(chan *http.Response, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov1" title="1">{
+                modifiedResp, err := h.executeCommand(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov1" title="1">respChan &lt;- modifiedResp</span>
+        }()
+
+        <span class="cov1" title="1">return respChan, errChan</span>
+}
+
+// executeCommand 执行命令行命令处理响应
+func (h *CommandResponseHook) executeCommand(resp *http.Response) (*http.Response, error) <span class="cov4" title="2">{
+        // 创建上下文，设置超时
+        ctx, cancel := context.WithTimeout(context.Background(), h.Timeout)
+        defer cancel()
+
+        // 准备命令
+        cmd := exec.CommandContext(ctx, "sh", "-c", h.Command)
+
+        // 读取响应体
+        bodyBytes, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp, fmt.Errorf("读取响应体失败: %w", err)
+        }</span>
+        <span class="cov4" title="2">resp.Body.Close()
+
+        // 将响应体传递给命令的标准输入
+        cmd.Stdin = bytes.NewBuffer(bodyBytes)
+
+        // 捕获标准输出和错误
+        var stdout, stderr bytes.Buffer
+        cmd.Stdout = &amp;stdout
+        cmd.Stderr = &amp;stderr
+
+        // 执行命令
+        if err := cmd.Run(); err != nil </span><span class="cov0" title="0">{
+                // 恢复原始响应体
+                resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+                return resp, fmt.Errorf("命令执行失败: %v, stderr: %s", err, stderr.String())
+        }</span>
+
+        // 如果有输出，使用它来替换响应体
+        <span class="cov4" title="2">if stdout.Len() &gt; 0 </span><span class="cov4" title="2">{
+                resp.Body = io.NopCloser(bytes.NewBuffer(stdout.Bytes()))
+                // 更新内容长度
+                resp.ContentLength = int64(stdout.Len())
+                // 删除Content-Length头，让Transport重新计算
+                resp.Header.Del("Content-Length")
+                return resp, nil
+        }</span>
+
+        // 恢复原始响应体
+        <span class="cov0" title="0">resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+        return resp, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package hooks
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+)
+
+// CustomFunctionHook 自定义钩子实现
+type CustomFunctionHook struct {
+        BeforeFn func(req *http.Request) (*http.Request, error)
+        AfterFn  func(resp *http.Response) (*http.Response, error)
+}
+
+// Before 执行自定义前置操作
+func (h *CustomFunctionHook) Before(req *http.Request) (*http.Request, error) <span class="cov9" title="8">{
+        if h.BeforeFn != nil </span><span class="cov8" title="7">{
+                return h.BeforeFn(req)
+        }</span>
+        <span class="cov1" title="1">return req, nil</span>
+}
+
+// BeforeAsync 异步执行自定义前置操作
+func (h *CustomFunctionHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov6" title="4">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov6" title="4">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov6" title="4">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov6" title="4">return reqChan, errChan</span>
+}
+
+// After 执行自定义后置操作
+func (h *CustomFunctionHook) After(resp *http.Response) (*http.Response, error) <span class="cov6" title="4">{
+        if h.AfterFn != nil </span><span class="cov5" title="3">{
+                return h.AfterFn(resp)
+        }</span>
+        <span class="cov1" title="1">return resp, nil</span>
+}
+
+// AfterAsync 异步执行自定义后置操作
+func (h *CustomFunctionHook) AfterAsync(resp *http.Response) (chan *http.Response, chan error) <span class="cov1" title="1">{
+        respChan := make(chan *http.Response, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov1" title="1">{
+                modifiedResp, err := h.After(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov1" title="1">respChan &lt;- modifiedResp</span>
+        }()
+
+        <span class="cov1" title="1">return respChan, errChan</span>
+}
+
+// NewCustomFunctionHook 创建新的自定义钩子
+func NewCustomFunctionHook(
+        beforeFn func(req *http.Request) (*http.Request, error),
+        afterFn func(resp *http.Response) (*http.Response, error),
+) *CustomFunctionHook <span class="cov0" title="0">{
+        return &amp;CustomFunctionHook{
+                BeforeFn: beforeFn,
+                AfterFn:  afterFn,
+        }
+}</span>
+
+// LoggingHook 日志记录钩子
+type LoggingHook struct{}
+
+// Before 记录请求信息
+func (h *LoggingHook) Before(req *http.Request) (*http.Request, error) <span class="cov5" title="3">{
+        fmt.Printf("正在发送 %s 请求到 %s\n", req.Method, req.URL.String())
+        return req, nil
+}</span>
+
+// BeforeAsync 异步记录请求信息
+func (h *LoggingHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov1" title="1">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov1" title="1">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov1" title="1">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov1" title="1">return reqChan, errChan</span>
+}
+
+// NewLoggingHook 创建新的日志钩子
+func NewLoggingHook() *LoggingHook <span class="cov0" title="0">{
+        return &amp;LoggingHook{}
+}</span>
+
+// ResponseLogHook 响应日志钩子
+type ResponseLogHook struct{}
+
+// After 记录响应信息
+func (h *ResponseLogHook) After(resp *http.Response) (*http.Response, error) <span class="cov5" title="3">{
+        fmt.Printf("收到响应: 状态码 %d\n", resp.StatusCode)
+        return resp, nil
+}</span>
+
+// AfterAsync 异步记录响应信息
+func (h *ResponseLogHook) AfterAsync(resp *http.Response) (chan *http.Response, chan error) <span class="cov1" title="1">{
+        respChan := make(chan *http.Response, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov1" title="1">{
+                modifiedResp, err := h.After(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov1" title="1">respChan &lt;- modifiedResp</span>
+        }()
+
+        <span class="cov1" title="1">return respChan, errChan</span>
+}
+
+// NewResponseLogHook 创建新的响应日志钩子
+func NewResponseLogHook() *ResponseLogHook <span class="cov0" title="0">{
+        return &amp;ResponseLogHook{}
+}</span>
+
+// AuthHook 认证钩子
+type AuthHook struct {
+        Token string
+}
+
+// Before 添加认证信息
+func (h *AuthHook) Before(req *http.Request) (*http.Request, error) <span class="cov8" title="6">{
+        req.Header.Set("Authorization", "Bearer "+h.Token)
+        return req, nil
+}</span>
+
+// BeforeAsync 异步添加认证信息
+func (h *AuthHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov5" title="3">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov5" title="3">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov5" title="3">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov5" title="3">return reqChan, errChan</span>
+}
+
+// NewAuthHook 创建新的认证钩子
+func NewAuthHook(token string) *AuthHook <span class="cov0" title="0">{
+        return &amp;AuthHook{
+                Token: token,
+        }
+}</span>
+
+// FieldTransformHook 字段转换钩子
+type FieldTransformHook struct {
+        TransformMap map[string]string // 源字段到目标字段的映射
+}
+
+// Before 在请求前转换JSON字段
+func (h *FieldTransformHook) Before(req *http.Request) (*http.Request, error) <span class="cov10" title="9">{
+        // 只处理POST和PUT请求
+        if req.Method != http.MethodPost &amp;&amp; req.Method != http.MethodPut </span><span class="cov3" title="2">{
+                return req, nil
+        }</span>
+
+        // 读取请求体
+        <span class="cov8" title="7">if req.Body == nil </span><span class="cov0" title="0">{
+                return req, nil
+        }</span>
+
+        <span class="cov8" title="7">bodyBytes, err := ReadRequestBody(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // 解析JSON
+        <span class="cov8" title="7">data, err := parseJSONBody(bodyBytes)
+        if err != nil </span><span class="cov0" title="0">{
+                // 如果不是JSON，直接返回原始请求
+                req.Body = createBodyReader(bodyBytes)
+                return req, nil
+        }</span>
+
+        // 应用字段转换
+        <span class="cov8" title="7">transformed := false
+        for srcField, destField := range h.TransformMap </span><span class="cov8" title="7">{
+                if val, ok := data[srcField]; ok </span><span class="cov7" title="5">{
+                        data[destField] = val
+                        delete(data, srcField)
+                        transformed = true
+                }</span>
+        }
+
+        // 只在有转换时重新编码
+        <span class="cov8" title="7">if transformed </span><span class="cov7" title="5">{
+                newBody, err := encodeJSONBody(data)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                // 更新请求体
+                <span class="cov7" title="5">return ReplaceRequestBody(req, newBody)</span>
+        }
+
+        <span class="cov3" title="2">return req, nil</span>
+}
+
+// BeforeAsync 异步在请求前转换JSON字段
+func (h *FieldTransformHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov6" title="4">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov6" title="4">{
+                modifiedReq, err := h.Before(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        return
+                }</span>
+                <span class="cov6" title="4">reqChan &lt;- modifiedReq</span>
+        }()
+
+        <span class="cov6" title="4">return reqChan, errChan</span>
+}
+
+// NewFieldTransformHook 创建新的字段转换钩子
+func NewFieldTransformHook(transformMap map[string]string) *FieldTransformHook <span class="cov3" title="2">{
+        return &amp;FieldTransformHook{
+                TransformMap: transformMap,
+        }
+}</span>
+
+// 辅助函数：解析JSON
+func parseJSONBody(body []byte) (map[string]interface{}, error) <span class="cov8" title="7">{
+        var data map[string]interface{}
+        err := json.Unmarshal(body, &amp;data)
+        return data, err
+}</span>
+
+// 辅助函数：创建请求体reader
+func createBodyReader(body []byte) io.ReadCloser <span class="cov0" title="0">{
+        return io.NopCloser(bytes.NewReader(body))
+}</span>
+
+// 辅助函数：编码JSON
+func encodeJSONBody(data map[string]interface{}) ([]byte, error) <span class="cov7" title="5">{
+        return json.Marshal(data)
+}</span>
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">// Package hooks 提供请求处理前后的钩子功能
+package hooks
+
+import (
+        "bytes"
+        "context"
+        "errors"
+        "fmt"
+        "io"
+        "net/http"
+        "time"
+)
+
+// 定义错误类型
+var (
+        ErrJSHookMissingSourceOrContent  = errors.New("JS钩子必须指定source或content")
+        ErrCmdHookMissingSourceOrContent = errors.New("命令钩子必须指定source或content")
+        ErrCustomHookNotSupported        = errors.New("自定义钩子不能通过模板创建，需要在代码中注册")
+        ErrUnsupportedHookType           = errors.New("不支持的钩子类型")
+)
+
+// BeforeRequestHookFunc 请求前钩子函数
+type BeforeRequestHookFunc func(*http.Request) (*http.Request, error)
+
+// AfterResponseHookFunc 响应后钩子函数
+type AfterResponseHookFunc func(*http.Response) (*http.Response, error)
+
+// BeforeRequestHook 请求前钩子接口
+type BeforeRequestHook interface {
+        Before(req *http.Request) (*http.Request, error)
+        BeforeAsync(req *http.Request) (chan *http.Request, chan error)
+}
+
+// AfterResponseHook 响应后钩子接口
+type AfterResponseHook interface {
+        After(resp *http.Response) (*http.Response, error)
+        AfterAsync(resp *http.Response) (chan *http.Response, chan error)
+}
+
+// Hook 通用钩子接口
+type Hook interface {
+        GetConfig() *HookConfig
+}
+
+// HookConfig 钩子配置
+type HookConfig struct {
+        Type           string
+        Name           string
+        Async          bool
+        TimeoutSeconds int
+}
+
+// HookDefinition 钩子定义
+type HookDefinition struct {
+        Type     string            `json:"type"`
+        Name     string            `json:"name"`
+        Script   string            `json:"script,omitempty"`
+        Command  string            `json:"command,omitempty"`
+        Function string            `json:"function,omitempty"`
+        Config   map[string]string `json:"config,omitempty"`
+        Async    bool              `json:"async,omitempty"`
+        Timeout  int               `json:"timeout,omitempty"`
+}
+
+// ReadRequestBody 读取请求体内容并重置Body
+func ReadRequestBody(req *http.Request) ([]byte, error) <span class="cov10" title="15">{
+        if req == nil || req.Body == nil </span><span class="cov0" title="0">{
+                return []byte{}, nil
+        }</span>
+
+        <span class="cov10" title="15">bodyBytes, err := io.ReadAll(req.Body)
+        req.Body.Close()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // 重置请求体，以便后续处理可以再次读取
+        <span class="cov10" title="15">req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+        return bodyBytes, nil</span>
+}
+
+// ReplaceRequestBody 替换请求的正文内容
+func ReplaceRequestBody(req *http.Request, bodyBytes []byte) (*http.Request, error) <span class="cov8" title="10">{
+        req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+        req.ContentLength = int64(len(bodyBytes))
+        return req, nil
+}</span>
+
+// IsBodyJSON 检查请求体是否为JSON格式
+func IsBodyJSON(req *http.Request) bool <span class="cov0" title="0">{
+        contentType := req.Header.Get("Content-Type")
+        return contentType == "application/json" || contentType == "application/json; charset=utf-8"
+}</span>
+
+// ExecuteHookWithTimeout 带超时执行钩子
+func ExecuteHookWithTimeout(ctx context.Context, hook func() error, timeoutSeconds int) error <span class="cov0" title="0">{
+        if timeoutSeconds &lt;= 0 </span><span class="cov0" title="0">{
+                // 默认超时10秒
+                timeoutSeconds = 10
+        }</span>
+
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutSeconds)*time.Second)
+        defer cancel()
+
+        errCh := make(chan error, 1)
+        go func() </span><span class="cov0" title="0">{
+                errCh &lt;- hook()
+        }</span>()
+
+        <span class="cov0" title="0">select </span>{
+        case err := &lt;-errCh:<span class="cov0" title="0">
+                return err</span>
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                return errors.New("hook execution timed out")</span>
+        }
+}
+
+// CreateHookFromDefinition 从定义创建钩子
+func CreateHookFromDefinition(def *HookDefinition) (interface{}, error) <span class="cov0" title="0">{
+        switch def.Type </span>{
+        case "js":<span class="cov0" title="0">
+                return NewJSHookFromString(def.Script, def.Async, def.Timeout)</span>
+        case "command":<span class="cov0" title="0">
+                return NewCommandHook(def.Command, def.Timeout, def.Async), nil</span>
+        case "function":<span class="cov0" title="0">
+                return nil, fmt.Errorf("未实现的钩子类型: %s", def.Type)</span>
+        default:<span class="cov0" title="0">
+                return nil, fmt.Errorf("未知的钩子类型: %s", def.Type)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package hooks
+
+import (
+        "bytes"
+        "crypto/rand"
+        "crypto/rsa"
+        "crypto/x509"
+        "encoding/base64"
+        "encoding/json"
+        "encoding/pem"
+        "fmt"
+        "io"
+        "net/http"
+        "os"
+        "time"
+
+        "crypto"
+
+        "github.com/dop251/goja"
+)
+
+// JSHook 实现BeforeRequestHook和AsyncBeforeRequestHook接口，用于执行JavaScript预请求脚本
+// 可以用于灵活地处理请求体、添加请求头等操作
+type JSHook struct {
+        ScriptPath    string        // JavaScript脚本文件路径
+        ScriptContent string        // JavaScript脚本内容（优先级高于ScriptPath）
+        IsAsync       bool          // 是否异步执行
+        Timeout       time.Duration // 脚本执行超时时间
+}
+
+// NewJSHook 创建一个新的JavaScript钩子
+// 参数:
+// - scriptPath: JavaScript脚本文件路径
+// - isAsync: 是否异步执行
+// - timeoutSeconds: 脚本执行超时时间（秒）
+func NewJSHook(scriptPath string, isAsync bool, timeoutSeconds int) *JSHook <span class="cov1" title="1">{
+        return &amp;JSHook{
+                ScriptPath: scriptPath,
+                IsAsync:    isAsync,
+                Timeout:    time.Duration(timeoutSeconds) * time.Second,
+        }
+}</span>
+
+// NewJSHookFromFile 从文件创建JavaScript钩子
+// 这个函数会检查文件是否存在，但不会验证文件内容的有效性
+// 参数:
+// - scriptPath: JavaScript脚本文件路径
+// - isAsync: 是否异步执行
+// - timeoutSeconds: 脚本执行超时时间（秒）
+func NewJSHookFromFile(scriptPath string, isAsync bool, timeoutSeconds int) (*JSHook, error) <span class="cov3" title="2">{
+        if _, err := os.Stat(scriptPath); os.IsNotExist(err) </span><span class="cov1" title="1">{
+                return nil, fmt.Errorf("脚本文件不存在: %s", scriptPath)
+        }</span>
+        <span class="cov1" title="1">return NewJSHook(scriptPath, isAsync, timeoutSeconds), nil</span>
+}
+
+// NewJSHookFromString 从字符串内容创建JavaScript钩子
+// 推荐在脚本较小或动态生成脚本内容时使用此方法
+// 参数:
+// - scriptContent: JavaScript脚本内容
+// - isAsync: 是否异步执行
+// - timeoutSeconds: 脚本执行超时时间（秒）
+func NewJSHookFromString(scriptContent string, isAsync bool, timeoutSeconds int) (*JSHook, error) <span class="cov5" title="4">{
+        hook := &amp;JSHook{
+                ScriptContent: scriptContent,
+                IsAsync:       isAsync,
+                Timeout:       time.Duration(timeoutSeconds) * time.Second,
+        }
+        return hook, nil
+}</span>
+
+// Before 在请求发送前执行JavaScript脚本
+// 如果钩子配置为异步模式，此方法会同步等待异步执行完成，但仍会阻塞直到结果返回或超时
+// 实现BeforeRequestHook接口
+func (h *JSHook) Before(req *http.Request) (*http.Request, error) <span class="cov6" title="6">{
+        if h.IsAsync </span><span class="cov0" title="0">{
+                reqChan, errChan := h.BeforeAsync(req)
+                select </span>{
+                case modifiedReq := &lt;-reqChan:<span class="cov0" title="0">
+                        return modifiedReq, nil</span>
+                case err := &lt;-errChan:<span class="cov0" title="0">
+                        return req, err</span>
+                case &lt;-time.After(h.Timeout):<span class="cov0" title="0">
+                        return req, fmt.Errorf("脚本执行超时")</span>
+                }
+        }
+
+        // 同步执行脚本
+        <span class="cov6" title="6">return h.executeScript(req)</span>
+}
+
+// BeforeAsync 异步执行JavaScript脚本
+// 返回两个通道，一个用于获取处理后的请求，一个用于获取可能发生的错误
+// 实现AsyncBeforeRequestHook接口
+func (h *JSHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) <span class="cov0" title="0">{
+        reqChan := make(chan *http.Request, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov0" title="0">{
+                modifiedReq, err := h.executeScript(req)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        close(reqChan)
+                        close(errChan)
+                        return
+                }</span>
+                <span class="cov0" title="0">reqChan &lt;- modifiedReq
+                close(reqChan)
+                close(errChan)</span>
+        }()
+
+        <span class="cov0" title="0">return reqChan, errChan</span>
+}
+
+// executeScript 执行JavaScript脚本并处理请求
+// 这是内部方法，用于实际执行JS代码并处理请求
+func (h *JSHook) executeScript(req *http.Request) (*http.Request, error) <span class="cov6" title="6">{
+        // 获取脚本内容
+        scriptContent, err := h.getScriptContent()
+        if err != nil </span><span class="cov0" title="0">{
+                return req, err
+        }</span>
+
+        // 创建JavaScript运行时
+        <span class="cov6" title="6">vm := goja.New()
+
+        // 设置JavaScript环境
+        if err := h.setupJSEnvironment(vm); err != nil </span><span class="cov0" title="0">{
+                return req, err
+        }</span>
+
+        // 执行脚本
+        <span class="cov6" title="6">if _, err := vm.RunString(string(scriptContent)); err != nil </span><span class="cov1" title="1">{
+                return req, fmt.Errorf("执行脚本失败: %w", err)
+        }</span>
+
+        // 如果没有请求体，直接返回
+        <span class="cov5" title="5">if req.Body == nil </span><span class="cov0" title="0">{
+                return req, nil
+        }</span>
+
+        // 处理请求体
+        <span class="cov5" title="5">return h.processRequestWithJS(vm, req)</span>
+}
+
+// getScriptContent 获取脚本内容，优先使用直接提供的内容，其次从文件读取
+func (h *JSHook) getScriptContent() ([]byte, error) <span class="cov6" title="6">{
+        // 优先使用ScriptContent
+        if h.ScriptContent != "" </span><span class="cov5" title="5">{
+                return []byte(h.ScriptContent), nil
+        }</span>
+
+        // 其次使用ScriptPath
+        <span class="cov1" title="1">if h.ScriptPath != "" </span><span class="cov1" title="1">{
+                content, err := os.ReadFile(h.ScriptPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("读取脚本文件失败: %w", err)
+                }</span>
+                <span class="cov1" title="1">return content, nil</span>
+        }
+
+        <span class="cov0" title="0">return nil, fmt.Errorf("未提供脚本内容或脚本路径")</span>
+}
+
+// setupJSEnvironment 设置JavaScript运行环境，添加控制台日志和RSA加密等功能
+func (h *JSHook) setupJSEnvironment(vm *goja.Runtime) error <span class="cov6" title="6">{
+        // 添加console.log实现
+        console := make(map[string]interface{})
+        console["log"] = func(call goja.FunctionCall) goja.Value </span><span class="cov3" title="2">{
+                args := make([]interface{}, len(call.Arguments))
+                for i, arg := range call.Arguments </span><span class="cov4" title="3">{
+                        args[i] = arg.Export()
+                }</span>
+                <span class="cov3" title="2">fmt.Printf("[JS] %v\n", args)
+                return goja.Undefined()</span>
+        }
+        <span class="cov6" title="6">vm.Set("console", console)
+
+        // 添加RSA加密函数
+        vm.Set("rsaEncryptGo", func(call goja.FunctionCall) goja.Value </span><span class="cov0" title="0">{
+                if len(call.Arguments) &lt; 2 </span><span class="cov0" title="0">{
+                        return vm.ToValue("错误: 缺少参数")
+                }</span>
+
+                <span class="cov0" title="0">text := call.Arguments[0].String()
+                pemKey := call.Arguments[1].String()
+
+                encryptedB64, err := RSAEncrypt(text, pemKey)
+                if err != nil </span><span class="cov0" title="0">{
+                        return vm.ToValue("错误: " + err.Error())
+                }</span>
+
+                <span class="cov0" title="0">return vm.ToValue(encryptedB64)</span>
+        })
+
+        <span class="cov6" title="6">return nil</span>
+}
+
+// processRequestWithJS 使用JS处理请求
+// 将HTTP请求转换为JavaScript对象，调用JS函数处理，再转回HTTP请求
+func (h *JSHook) processRequestWithJS(vm *goja.Runtime, req *http.Request) (*http.Request, error) <span class="cov5" title="5">{
+        // 读取请求体
+        bodyBytes, err := ReadRequestBody(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return req, fmt.Errorf("读取请求体失败: %w", err)
+        }</span>
+
+        // 解析JSON请求体
+        <span class="cov5" title="5">var requestBody map[string]interface{}
+        if err := json.Unmarshal(bodyBytes, &amp;requestBody); err != nil </span><span class="cov0" title="0">{
+                return req, fmt.Errorf("解析请求体失败: %w", err)
+        }</span>
+
+        // 获取请求头
+        <span class="cov5" title="5">headers := make(map[string]string)
+        for k, v := range req.Header </span><span class="cov3" title="2">{
+                if len(v) &gt; 0 </span><span class="cov3" title="2">{
+                        headers[k] = v[0]
+                }</span>
+        }
+
+        // 准备JavaScript请求对象
+        <span class="cov5" title="5">jsRequest := map[string]interface{}{
+                "body":    requestBody,
+                "headers": headers,
+                "method":  req.Method,
+                "url":     req.URL.String(),
+        }
+
+        // 调用JavaScript处理函数
+        processRequestFn, ok := goja.AssertFunction(vm.Get("processRequest"))
+        if !ok </span><span class="cov1" title="1">{
+                return req, fmt.Errorf("脚本中未找到processRequest函数")
+        }</span>
+
+        // 执行处理函数
+        <span class="cov5" title="4">result, err := processRequestFn(goja.Undefined(), vm.ToValue(jsRequest))
+        if err != nil </span><span class="cov0" title="0">{
+                return req, fmt.Errorf("执行processRequest函数失败: %w", err)
+        }</span>
+
+        // 处理JavaScript返回的结果
+        <span class="cov5" title="4">return h.handleProcessedRequest(req, result)</span>
+}
+
+// getRequestHeaders 获取请求头，返回键值对形式的Map
+func getRequestHeaders(req *http.Request) map[string]string <span class="cov0" title="0">{
+        headers := make(map[string]string)
+        for k, v := range req.Header </span><span class="cov0" title="0">{
+                if len(v) &gt; 0 </span><span class="cov0" title="0">{
+                        headers[k] = v[0]
+                }</span>
+        }
+        <span class="cov0" title="0">return headers</span>
+}
+
+// handleProcessedRequest 处理JavaScript返回的请求对象
+// 将JS对象转换回HTTP请求，包括处理请求体和请求头
+func (h *JSHook) handleProcessedRequest(req *http.Request, result goja.Value) (*http.Request, error) <span class="cov5" title="4">{
+        // 获取处理后的请求对象
+        processedRequest, ok := result.Export().(map[string]interface{})
+        if !ok </span><span class="cov1" title="1">{
+                return req, fmt.Errorf("无法解析处理后的请求对象")
+        }</span>
+
+        // 提取处理后的请求体
+        <span class="cov4" title="3">processedBody, ok := processedRequest["body"].(map[string]interface{})
+        if !ok </span><span class="cov0" title="0">{
+                return req, fmt.Errorf("无法解析处理后的请求体")
+        }</span>
+
+        // 处理请求头
+        <span class="cov4" title="3">fmt.Println("处理JS返回的请求头:")
+        if headers, ok := processedRequest["headers"].(map[string]interface{}); ok </span><span class="cov0" title="0">{
+                for k, v := range headers </span><span class="cov0" title="0">{
+                        if strVal, ok := v.(string); ok </span><span class="cov0" title="0">{
+                                req.Header.Set(k, strVal)
+                                fmt.Printf("[JS-DEBUG] 设置请求头 %s: %s\n", k, strVal)
+                        }</span>
+                }
+        }
+
+        // 打印最终的请求头
+        <span class="cov4" title="3">fmt.Println("JS处理后的所有请求头:")
+        for k, v := range req.Header </span><span class="cov3" title="2">{
+                fmt.Printf("%s: %v\n", k, v)
+        }</span>
+
+        // 将处理后的请求体重新序列化为JSON
+        <span class="cov4" title="3">newBodyBytes, err := json.Marshal(processedBody)
+        if err != nil </span><span class="cov0" title="0">{
+                return req, fmt.Errorf("序列化处理后的请求体失败: %w", err)
+        }</span>
+
+        // 更新请求体
+        <span class="cov4" title="3">return ReplaceRequestBody(req, newBodyBytes)</span>
+}
+
+// JSResponseHook JavaScript响应钩子，用于在接收到响应后执行JavaScript处理
+type JSResponseHook struct {
+        ScriptPath    string        // JavaScript脚本文件路径
+        ScriptContent string        // JavaScript脚本内容
+        IsAsync       bool          // 是否异步执行
+        Timeout       time.Duration // 脚本执行超时时间
+}
+
+// NewJSResponseHook 创建一个新的JavaScript响应钩子
+func NewJSResponseHook(scriptPath string, isAsync bool, timeoutSeconds int) *JSResponseHook <span class="cov1" title="1">{
+        return &amp;JSResponseHook{
+                ScriptPath: scriptPath,
+                IsAsync:    isAsync,
+                Timeout:    time.Duration(timeoutSeconds) * time.Second,
+        }
+}</span>
+
+// NewJSResponseHookFromFile 从文件创建JavaScript响应钩子
+// 参数:
+// - scriptPath: JavaScript脚本文件路径
+// - isAsync: 是否异步执行
+// - timeoutSeconds: 脚本执行超时时间（秒）
+func NewJSResponseHookFromFile(scriptPath string, isAsync bool, timeoutSeconds int) (*JSResponseHook, error) <span class="cov1" title="1">{
+        if _, err := os.Stat(scriptPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("脚本文件不存在: %s", scriptPath)
+        }</span>
+        <span class="cov1" title="1">return NewJSResponseHook(scriptPath, isAsync, timeoutSeconds), nil</span>
+}
+
+// NewJSResponseHookFromString 从字符串内容创建JavaScript响应钩子
+// 参数:
+// - scriptContent: JavaScript脚本内容
+// - isAsync: 是否异步执行
+// - timeoutSeconds: 脚本执行超时时间（秒）
+func NewJSResponseHookFromString(scriptContent string, isAsync bool, timeoutSeconds int) (*JSResponseHook, error) <span class="cov5" title="4">{
+        hook := &amp;JSResponseHook{
+                ScriptContent: scriptContent,
+                IsAsync:       isAsync,
+                Timeout:       time.Duration(timeoutSeconds) * time.Second,
+        }
+        return hook, nil
+}</span>
+
+// After 在响应接收后执行JavaScript脚本
+// 实现AfterResponseHook接口
+func (h *JSResponseHook) After(resp *http.Response) (*http.Response, error) <span class="cov5" title="5">{
+        if h.IsAsync </span><span class="cov0" title="0">{
+                respChan, errChan := h.AfterAsync(resp)
+                select </span>{
+                case modifiedResp := &lt;-respChan:<span class="cov0" title="0">
+                        return modifiedResp, nil</span>
+                case err := &lt;-errChan:<span class="cov0" title="0">
+                        return resp, err</span>
+                case &lt;-time.After(h.Timeout):<span class="cov0" title="0">
+                        return resp, fmt.Errorf("脚本执行超时")</span>
+                }
+        }
+
+        // 同步执行脚本
+        <span class="cov5" title="5">return h.executeScript(resp)</span>
+}
+
+// AfterAsync 异步执行JavaScript脚本
+// 实现AsyncAfterResponseHook接口
+func (h *JSResponseHook) AfterAsync(resp *http.Response) (chan *http.Response, chan error) <span class="cov1" title="1">{
+        respChan := make(chan *http.Response, 1)
+        errChan := make(chan error, 1)
+
+        go func() </span><span class="cov1" title="1">{
+                modifiedResp, err := h.executeScript(resp)
+                if err != nil </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                        close(respChan)
+                        close(errChan)
+                        return
+                }</span>
+                <span class="cov1" title="1">respChan &lt;- modifiedResp
+                close(respChan)
+                close(errChan)</span>
+        }()
+
+        <span class="cov1" title="1">return respChan, errChan</span>
+}
+
+// executeScript 执行JavaScript脚本并处理响应
+// 这是内部方法，用于实际执行JS代码并处理响应
+func (h *JSResponseHook) executeScript(resp *http.Response) (*http.Response, error) <span class="cov6" title="6">{
+        // 获取脚本内容
+        scriptContent, err := h.getScriptContent()
+        if err != nil </span><span class="cov0" title="0">{
+                return resp, err
+        }</span>
+
+        // 创建JavaScript运行时
+        <span class="cov6" title="6">vm := goja.New()
+
+        // 设置JavaScript环境
+        if err := h.setupJSEnvironment(vm); err != nil </span><span class="cov0" title="0">{
+                return resp, err
+        }</span>
+
+        // 执行脚本
+        <span class="cov6" title="6">if _, err := vm.RunString(string(scriptContent)); err != nil </span><span class="cov1" title="1">{
+                return resp, fmt.Errorf("执行脚本失败: %w", err)
+        }</span>
+
+        // 如果没有响应体，直接返回
+        <span class="cov5" title="5">if resp.Body == nil </span><span class="cov0" title="0">{
+                return resp, nil
+        }</span>
+
+        // 处理响应体
+        <span class="cov5" title="5">return h.processResponseWithJS(vm, resp)</span>
+}
+
+// getScriptContent 获取脚本内容
+// 优先使用ScriptContent，其次使用ScriptPath
+func (h *JSResponseHook) getScriptContent() ([]byte, error) <span class="cov6" title="6">{
+        if h.ScriptContent != "" </span><span class="cov5" title="5">{
+                return []byte(h.ScriptContent), nil
+        }</span>
+
+        <span class="cov1" title="1">if h.ScriptPath != "" </span><span class="cov1" title="1">{
+                content, err := os.ReadFile(h.ScriptPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("读取脚本文件失败: %w", err)
+                }</span>
+                <span class="cov1" title="1">return content, nil</span>
+        }
+
+        <span class="cov0" title="0">return nil, fmt.Errorf("未提供脚本内容或脚本路径")</span>
+}
+
+// setupJSEnvironment 设置JavaScript运行环境
+// 添加控制台日志等功能
+func (h *JSResponseHook) setupJSEnvironment(vm *goja.Runtime) error <span class="cov6" title="6">{
+        // 添加console.log实现
+        console := make(map[string]interface{})
+        console["log"] = func(call goja.FunctionCall) goja.Value </span><span class="cov8" title="11">{
+                args := make([]interface{}, len(call.Arguments))
+                for i, arg := range call.Arguments </span><span class="cov10" title="21">{
+                        args[i] = arg.Export()
+                }</span>
+                <span class="cov8" title="11">fmt.Printf("[JS] %v\n", args)
+                return goja.Undefined()</span>
+        }
+        <span class="cov6" title="6">vm.Set("console", console)
+
+        return nil</span>
+}
+
+// processResponseWithJS 使用JS处理响应
+// 将HTTP响应转换为JavaScript对象，调用JS函数处理，再转回HTTP响应
+func (h *JSResponseHook) processResponseWithJS(vm *goja.Runtime, resp *http.Response) (*http.Response, error) <span class="cov5" title="5">{
+        // 读取响应体
+        bodyBytes, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp, fmt.Errorf("读取响应体失败: %w", err)
+        }</span>
+        <span class="cov5" title="5">resp.Body.Close()
+
+        // 解析响应体 (尝试解析为JSON，如果失败则保留原始内容)
+        var responseBody interface{}
+        if err := json.Unmarshal(bodyBytes, &amp;responseBody); err != nil </span><span class="cov0" title="0">{
+                // 如果不是JSON，使用原始内容
+                responseBody = string(bodyBytes)
+        }</span>
+
+        // 准备JavaScript响应对象
+        <span class="cov5" title="5">jsResponse := map[string]interface{}{
+                "body":    responseBody,
+                "status":  resp.StatusCode,
+                "headers": getResponseHeaders(resp),
+        }
+
+        // 记录原始状态码，用于调试
+        originalStatusCode := resp.StatusCode
+        fmt.Printf("[DEBUG] 原始状态码: %d\n", originalStatusCode)
+
+        // 调用JavaScript处理函数
+        processResponseFn, ok := goja.AssertFunction(vm.Get("processResponse"))
+        if !ok </span><span class="cov1" title="1">{
+                // 恢复原始响应体
+                resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+                return resp, fmt.Errorf("脚本中未找到processResponse函数")
+        }</span>
+
+        // 执行处理函数
+        <span class="cov5" title="4">result, err := processResponseFn(goja.Undefined(), vm.ToValue(jsResponse))
+        if err != nil </span><span class="cov0" title="0">{
+                // 恢复原始响应体
+                resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+                return resp, fmt.Errorf("执行processResponse函数失败: %w", err)
+        }</span>
+
+        // 输出处理后的响应对象，用于调试
+        <span class="cov5" title="4">fmt.Printf("[DEBUG] 处理后的响应对象: %+v\n", result.Export())
+
+        // 处理JavaScript返回的结果
+        return h.handleProcessedResponse(resp, result, bodyBytes)</span>
+}
+
+// handleProcessedResponse 处理JavaScript处理后的响应
+// 将JS对象转换回HTTP响应，包括处理状态码、响应头和响应体
+func (h *JSResponseHook) handleProcessedResponse(resp *http.Response, result goja.Value, originalBody []byte) (*http.Response, error) <span class="cov5" title="4">{
+        // 获取处理后的响应
+        processedResponse, ok := result.Export().(map[string]interface{})
+        if !ok </span><span class="cov0" title="0">{
+                // 恢复原始响应体
+                resp.Body = io.NopCloser(bytes.NewBuffer(originalBody))
+                return resp, fmt.Errorf("无法解析处理后的响应对象")
+        }</span>
+
+        // 处理状态码 - 支持多种数值类型
+        <span class="cov5" title="4">if status, ok := processedResponse["status"].(float64); ok </span><span class="cov0" title="0">{
+                resp.StatusCode = int(status)
+                fmt.Printf("[DEBUG] 设置状态码为 %d (从float64)\n", int(status))
+        }</span> else<span class="cov5" title="4"> if status, ok := processedResponse["status"].(int64); ok </span><span class="cov5" title="4">{
+                resp.StatusCode = int(status)
+                fmt.Printf("[DEBUG] 设置状态码为 %d (从int64)\n", int(status))
+        }</span> else<span class="cov0" title="0"> if status, ok := processedResponse["status"].(int); ok </span><span class="cov0" title="0">{
+                resp.StatusCode = status
+                fmt.Printf("[DEBUG] 设置状态码为 %d (从int)\n", status)
+        }</span>
+
+        // 处理头部 - 支持两种常见的头部格式
+        <span class="cov5" title="4">if headers, ok := processedResponse["headers"].(map[string]interface{}); ok </span><span class="cov0" title="0">{
+                for k, v := range headers </span><span class="cov0" title="0">{
+                        if strVal, ok := v.(string); ok </span><span class="cov0" title="0">{
+                                resp.Header.Set(k, strVal)
+                                fmt.Printf("[DEBUG] 设置头部 %s: %s\n", k, strVal)
+                        }</span>
+                }
+        } else<span class="cov5" title="4"> if headers, ok := processedResponse["headers"].(map[string]string); ok </span><span class="cov5" title="4">{
+                for k, v := range headers </span><span class="cov6" title="6">{
+                        resp.Header.Set(k, v)
+                        fmt.Printf("[DEBUG] 设置头部 %s: %s\n", k, v)
+                }</span>
+        }
+
+        // 处理响应体
+        <span class="cov5" title="4">if body, exists := processedResponse["body"]; exists </span><span class="cov5" title="4">{
+                return h.setResponseBody(resp, body)
+        }</span>
+
+        // 如果没有修改响应体，恢复原始响应体
+        <span class="cov0" title="0">resp.Body = io.NopCloser(bytes.NewBuffer(originalBody))
+        return resp, nil</span>
+}
+
+// setResponseBody 设置新的响应体
+// 根据body的类型(字符串或其他)设置新的响应体
+func (h *JSResponseHook) setResponseBody(resp *http.Response, body interface{}) (*http.Response, error) <span class="cov5" title="4">{
+        var newBodyBytes []byte
+        var err error
+
+        // 根据类型处理响应体
+        switch bodyVal := body.(type) </span>{
+        case string:<span class="cov0" title="0">
+                newBodyBytes = []byte(bodyVal)</span>
+        default:<span class="cov5" title="4">
+                // 否则，尝试序列化为JSON
+                newBodyBytes, err = json.Marshal(bodyVal)
+                if err != nil </span><span class="cov0" title="0">{
+                        return resp, fmt.Errorf("序列化处理后的响应体失败: %w", err)
+                }</span>
+        }
+
+        // 设置新的响应体
+        <span class="cov5" title="4">resp.Body = io.NopCloser(bytes.NewBuffer(newBodyBytes))
+        // 更新内容长度
+        resp.ContentLength = int64(len(newBodyBytes))
+        // 删除Content-Length头，让Transport重新计算
+        resp.Header.Del("Content-Length")
+
+        return resp, nil</span>
+}
+
+// getResponseHeaders 获取响应头，返回键值对形式的Map
+func getResponseHeaders(resp *http.Response) map[string]string <span class="cov5" title="5">{
+        headers := make(map[string]string)
+        for k, v := range resp.Header </span><span class="cov3" title="2">{
+                if len(v) &gt; 0 </span><span class="cov3" title="2">{
+                        headers[k] = v[0]
+                }</span>
+        }
+        <span class="cov5" title="5">return headers</span>
+}
+
+// RSAEncrypt 使用RSA-OAEP算法加密文本
+// 此函数可在JavaScript中通过rsaEncryptGo函数调用
+// 参数:
+// - text: 要加密的文本
+// - publicKeyPEM: PEM格式的RSA公钥
+// 返回:
+// - 加密后的Base64编码字符串和可能的错误
+func RSAEncrypt(text string, publicKeyPEM string) (string, error) <span class="cov0" title="0">{
+        // 解析PEM格式的公钥
+        block, _ := pem.Decode([]byte(publicKeyPEM))
+        if block == nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("无法解析PEM格式的公钥")
+        }</span>
+
+        // 解析公钥
+        <span class="cov0" title="0">pubKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("解析公钥失败: %w", err)
+        }</span>
+
+        // 转换为RSA公钥
+        <span class="cov0" title="0">rsaPublicKey, ok := pubKey.(*rsa.PublicKey)
+        if !ok </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("不是有效的RSA公钥")
+        }</span>
+
+        // 使用RSA-OAEP加密数据，使用SHA-256哈希函数
+        <span class="cov0" title="0">encryptedBytes, err := rsa.EncryptOAEP(
+                crypto.SHA256.New(),
+                rand.Reader,
+                rsaPublicKey,
+                []byte(text),
+                nil,
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("RSA-OAEP加密失败: %w", err)
+        }</span>
+
+        // 返回Base64编码的加密结果
+        <span class="cov0" title="0">return base64.StdEncoding.EncodeToString(encryptedBytes), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">// Package template 提供模板处理功能，支持模板渲染和缓存
+package template
+
+import (
+        "crypto/md5"
+        "crypto/sha1"
+        "crypto/sha256"
+        "encoding/base64"
+        "encoding/hex"
+        "encoding/json"
+        "fmt"
+        "html"
+        "math"
+        "math/rand"
+        "net/url"
+        "regexp"
+        "sort"
+        "strings"
+        "time"
+)
+
+// registerBuiltinFunctions 注册所有内置函数
+func (e *Engine) registerBuiltinFunctions() <span class="cov10" title="13">{
+        // 字符串操作函数
+        e.registerStringFunctions()
+
+        // 日期与时间函数
+        e.registerDateTimeFunctions()
+
+        // 数学运算函数
+        e.registerMathFunctions()
+
+        // 数据转换函数
+        e.registerConversionFunctions()
+
+        // 集合操作函数
+        e.registerCollectionFunctions()
+
+        // 条件逻辑函数
+        e.registerConditionalFunctions()
+
+        // 加密与编码函数
+        e.registerCryptoFunctions()
+}</span>
+
+// registerStringFunctions 注册字符串操作函数
+func (e *Engine) registerStringFunctions() <span class="cov10" title="13">{
+        // 字符串大小写转换
+        e.funcs["toUpper"] = strings.ToUpper
+        e.funcs["toLower"] = strings.ToLower
+        e.funcs["title"] = strings.Title
+
+        // 字符串修剪
+        e.funcs["trim"] = strings.TrimSpace
+        e.funcs["trimPrefix"] = strings.TrimPrefix
+        e.funcs["trimSuffix"] = strings.TrimSuffix
+
+        // 字符串替换
+        e.funcs["replace"] = strings.Replace
+        e.funcs["replaceAll"] = strings.ReplaceAll
+
+        // 字符串分割与连接
+        e.funcs["split"] = strings.Split
+        e.funcs["join"] = strings.Join
+
+        // 字符串包含检查
+        e.funcs["contains"] = strings.Contains
+        e.funcs["hasPrefix"] = strings.HasPrefix
+        e.funcs["hasSuffix"] = strings.HasSuffix
+
+        // 字符串长度
+        e.funcs["length"] = func(s string) int </span><span class="cov1" title="1">{
+                return len(s)
+        }</span>
+
+        // 正则表达式
+        <span class="cov10" title="13">e.funcs["regexMatch"] = func(pattern, s string) bool </span><span class="cov1" title="1">{
+                match, _ := regexp.MatchString(pattern, s)
+                return match
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["regexReplace"] = func(pattern, repl, s string) string </span><span class="cov1" title="1">{
+                re, err := regexp.Compile(pattern)
+                if err != nil </span><span class="cov0" title="0">{
+                        return s
+                }</span>
+                <span class="cov1" title="1">return re.ReplaceAllString(s, repl)</span>
+        }
+
+        // URL编码/解码
+        <span class="cov10" title="13">e.funcs["urlEncode"] = func(s string) string </span><span class="cov3" title="2">{
+                return url.QueryEscape(s)
+        }</span>
+        <span class="cov10" title="13">e.funcs["urlDecode"] = func(s string) string </span><span class="cov1" title="1">{
+                result, _ := url.QueryUnescape(s)
+                return result
+        }</span>
+
+        // HTML转义
+        <span class="cov10" title="13">e.funcs["htmlEscape"] = html.EscapeString
+        e.funcs["htmlUnescape"] = html.UnescapeString
+
+        // 子字符串
+        e.funcs["substr"] = func(s string, start, length int) string </span><span class="cov1" title="1">{
+                if start &lt; 0 </span><span class="cov0" title="0">{
+                        start = 0
+                }</span>
+                <span class="cov1" title="1">if start &gt; len(s) </span><span class="cov0" title="0">{
+                        return ""
+                }</span>
+                <span class="cov1" title="1">end := start + length
+                if end &gt; len(s) </span><span class="cov0" title="0">{
+                        end = len(s)
+                }</span>
+                <span class="cov1" title="1">return s[start:end]</span>
+        }
+
+        // 重复字符串
+        <span class="cov10" title="13">e.funcs["repeat"] = strings.Repeat</span>
+}
+
+// registerDateTimeFunctions 注册日期时间函数
+func (e *Engine) registerDateTimeFunctions() <span class="cov10" title="13">{
+        // 当前时间
+        e.funcs["now"] = time.Now
+
+        // 格式化时间
+        e.funcs["formatTime"] = func(t time.Time, layout string) string </span><span class="cov0" title="0">{
+                return t.Format(layout)
+        }</span>
+
+        // 常用日期格式
+        <span class="cov10" title="13">e.funcs["formatDate"] = func(t time.Time) string </span><span class="cov0" title="0">{
+                return t.Format("2006-01-02")
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["formatDateTime"] = func(t time.Time) string </span><span class="cov0" title="0">{
+                return t.Format("2006-01-02 15:04:05")
+        }</span>
+
+        // 时间解析
+        <span class="cov10" title="13">e.funcs["parseTime"] = func(layout, value string) (time.Time, error) </span><span class="cov0" title="0">{
+                return time.Parse(layout, value)
+        }</span>
+
+        // 时间操作
+        <span class="cov10" title="13">e.funcs["addDate"] = func(t time.Time, days int) time.Time </span><span class="cov0" title="0">{
+                return t.AddDate(0, 0, days)
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["addHours"] = func(t time.Time, hours int) time.Time </span><span class="cov0" title="0">{
+                return t.Add(time.Duration(hours) * time.Hour)
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["addMinutes"] = func(t time.Time, minutes int) time.Time </span><span class="cov0" title="0">{
+                return t.Add(time.Duration(minutes) * time.Minute)
+        }</span>
+
+        // 时间差
+        <span class="cov10" title="13">e.funcs["since"] = time.Since
+        e.funcs["until"] = time.Until
+
+        // 时间比较
+        e.funcs["isAfter"] = func(a, b time.Time) bool </span><span class="cov0" title="0">{
+                return a.After(b)
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["isBefore"] = func(a, b time.Time) bool </span><span class="cov0" title="0">{
+                return a.Before(b)
+        }</span>
+
+        // 获取时间组件
+        <span class="cov10" title="13">e.funcs["year"] = func(t time.Time) int </span><span class="cov0" title="0">{
+                return t.Year()
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["month"] = func(t time.Time) string </span><span class="cov0" title="0">{
+                return t.Month().String()
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["day"] = func(t time.Time) int </span><span class="cov0" title="0">{
+                return t.Day()
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["weekday"] = func(t time.Time) string </span><span class="cov0" title="0">{
+                return t.Weekday().String()
+        }</span>
+
+        // 时间戳
+        <span class="cov10" title="13">e.funcs["unixTime"] = func(t time.Time) int64 </span><span class="cov0" title="0">{
+                return t.Unix()
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["fromUnixTime"] = func(sec int64) time.Time </span><span class="cov0" title="0">{
+                return time.Unix(sec, 0)
+        }</span>
+}
+
+// registerMathFunctions 注册数学运算函数
+func (e *Engine) registerMathFunctions() <span class="cov10" title="13">{
+        // 基本运算
+        e.funcs["add"] = func(a, b float64) float64 </span><span class="cov1" title="1">{
+                return a + b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["sub"] = func(a, b float64) float64 </span><span class="cov1" title="1">{
+                return a - b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["mul"] = func(a, b float64) float64 </span><span class="cov1" title="1">{
+                return a * b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["div"] = func(a, b float64) float64 </span><span class="cov1" title="1">{
+                if b == 0 </span><span class="cov0" title="0">{
+                        return 0
+                }</span>
+                <span class="cov1" title="1">return a / b</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["mod"] = math.Mod
+
+        // 取整
+        e.funcs["ceil"] = math.Ceil
+        e.funcs["floor"] = math.Floor
+        e.funcs["round"] = math.Round
+
+        // 最大最小值
+        e.funcs["max"] = math.Max
+        e.funcs["min"] = math.Min
+
+        // 绝对值
+        e.funcs["abs"] = math.Abs
+
+        // 幂运算
+        e.funcs["pow"] = math.Pow
+        e.funcs["sqrt"] = math.Sqrt
+
+        // 随机数
+        e.funcs["rand"] = func() float64 </span><span class="cov0" title="0">{
+                return rand.Float64()
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["randInt"] = func(min, max int) int </span><span class="cov0" title="0">{
+                return rand.Intn(max-min) + min
+        }</span>
+}
+
+// registerConversionFunctions 注册数据转换函数
+func (e *Engine) registerConversionFunctions() <span class="cov10" title="13">{
+        // 类型转换
+        e.funcs["toString"] = func(v interface{}) string </span><span class="cov1" title="1">{
+                return fmt.Sprintf("%v", v)
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["toInt"] = func(v interface{}) int </span><span class="cov1" title="1">{
+                switch val := v.(type) </span>{
+                case int:<span class="cov0" title="0">
+                        return val</span>
+                case int64:<span class="cov0" title="0">
+                        return int(val)</span>
+                case float64:<span class="cov0" title="0">
+                        return int(val)</span>
+                case string:<span class="cov1" title="1">
+                        var i int
+                        fmt.Sscanf(val, "%d", &amp;i)
+                        return i</span>
+                default:<span class="cov0" title="0">
+                        return 0</span>
+                }
+        }
+
+        <span class="cov10" title="13">e.funcs["toFloat"] = func(v interface{}) float64 </span><span class="cov8" title="9">{
+                switch val := v.(type) </span>{
+                case float64:<span class="cov0" title="0">
+                        return val</span>
+                case int:<span class="cov8" title="9">
+                        return float64(val)</span>
+                case int64:<span class="cov0" title="0">
+                        return float64(val)</span>
+                case string:<span class="cov0" title="0">
+                        var f float64
+                        fmt.Sscanf(val, "%f", &amp;f)
+                        return f</span>
+                default:<span class="cov0" title="0">
+                        return 0</span>
+                }
+        }
+
+        <span class="cov10" title="13">e.funcs["toBool"] = func(v interface{}) bool </span><span class="cov1" title="1">{
+                switch val := v.(type) </span>{
+                case bool:<span class="cov0" title="0">
+                        return val</span>
+                case int:<span class="cov1" title="1">
+                        return val != 0</span>
+                case string:<span class="cov0" title="0">
+                        return val != "" &amp;&amp; val != "0" &amp;&amp; val != "false"</span>
+                default:<span class="cov0" title="0">
+                        return false</span>
+                }
+        }
+
+        // JSON操作
+        <span class="cov10" title="13">e.funcs["jsonEncode"] = func(v interface{}) string </span><span class="cov1" title="1">{
+                bytes, err := json.Marshal(v)
+                if err != nil </span><span class="cov0" title="0">{
+                        return "{}"
+                }</span>
+                <span class="cov1" title="1">return string(bytes)</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["jsonDecode"] = func(s string) interface{} </span><span class="cov1" title="1">{
+                var data interface{}
+                err := json.Unmarshal([]byte(s), &amp;data)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+                <span class="cov1" title="1">return data</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["prettifyJSON"] = func(s string) string </span><span class="cov0" title="0">{
+                var data interface{}
+                err := json.Unmarshal([]byte(s), &amp;data)
+                if err != nil </span><span class="cov0" title="0">{
+                        return s
+                }</span>
+                <span class="cov0" title="0">pretty, err := json.MarshalIndent(data, "", "  ")
+                if err != nil </span><span class="cov0" title="0">{
+                        return s
+                }</span>
+                <span class="cov0" title="0">return string(pretty)</span>
+        }
+}
+
+// registerCollectionFunctions 注册集合操作函数
+func (e *Engine) registerCollectionFunctions() <span class="cov10" title="13">{
+        // 数组/切片操作
+        e.funcs["first"] = func(a []interface{}) interface{} </span><span class="cov1" title="1">{
+                if len(a) == 0 </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+                <span class="cov1" title="1">return a[0]</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["last"] = func(a []interface{}) interface{} </span><span class="cov1" title="1">{
+                if len(a) == 0 </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+                <span class="cov1" title="1">return a[len(a)-1]</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["slice"] = func(a []interface{}, start, end int) []interface{} </span><span class="cov1" title="1">{
+                if start &lt; 0 </span><span class="cov0" title="0">{
+                        start = 0
+                }</span>
+                <span class="cov1" title="1">if end &gt; len(a) </span><span class="cov0" title="0">{
+                        end = len(a)
+                }</span>
+                <span class="cov1" title="1">return a[start:end]</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["append"] = func(a []interface{}, v interface{}) []interface{} </span><span class="cov0" title="0">{
+                return append(a, v)
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["indexOf"] = func(a []interface{}, v interface{}) int </span><span class="cov0" title="0">{
+                for i, item := range a </span><span class="cov0" title="0">{
+                        if item == v </span><span class="cov0" title="0">{
+                                return i
+                        }</span>
+                }
+                <span class="cov0" title="0">return -1</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["reverse"] = func(a []interface{}) []interface{} </span><span class="cov0" title="0">{
+                reversed := make([]interface{}, len(a))
+                for i, item := range a </span><span class="cov0" title="0">{
+                        reversed[len(a)-i-1] = item
+                }</span>
+                <span class="cov0" title="0">return reversed</span>
+        }
+
+        // Map操作
+        <span class="cov10" title="13">e.funcs["keys"] = func(m map[string]interface{}) []string </span><span class="cov1" title="1">{
+                keys := make([]string, 0, len(m))
+                for k := range m </span><span class="cov3" title="2">{
+                        keys = append(keys, k)
+                }</span>
+                <span class="cov1" title="1">sort.Strings(keys)
+                return keys</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["values"] = func(m map[string]interface{}) []interface{} </span><span class="cov1" title="1">{
+                values := make([]interface{}, 0, len(m))
+                for _, v := range m </span><span class="cov3" title="2">{
+                        values = append(values, v)
+                }</span>
+                <span class="cov1" title="1">return values</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["hasKey"] = func(m map[string]interface{}, key string) bool </span><span class="cov1" title="1">{
+                _, ok := m[key]
+                return ok
+        }</span>
+
+        // 集合聚合
+        <span class="cov10" title="13">e.funcs["sum"] = func(a []float64) float64 </span><span class="cov0" title="0">{
+                sum := 0.0
+                for _, v := range a </span><span class="cov0" title="0">{
+                        sum += v
+                }</span>
+                <span class="cov0" title="0">return sum</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["avg"] = func(a []float64) float64 </span><span class="cov0" title="0">{
+                if len(a) == 0 </span><span class="cov0" title="0">{
+                        return 0
+                }</span>
+                <span class="cov0" title="0">return e.funcs["sum"].(func([]float64) float64)(a) / float64(len(a))</span>
+        }
+}
+
+// registerConditionalFunctions 注册条件逻辑函数
+func (e *Engine) registerConditionalFunctions() <span class="cov10" title="13">{
+        // 条件选择
+        e.funcs["ternary"] = func(condition bool, trueVal, falseVal interface{}) interface{} </span><span class="cov1" title="1">{
+                if condition </span><span class="cov1" title="1">{
+                        return trueVal
+                }</span>
+                <span class="cov0" title="0">return falseVal</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["defaultValue"] = func(val, defaultVal interface{}) interface{} </span><span class="cov1" title="1">{
+                if val == nil </span><span class="cov1" title="1">{
+                        return defaultVal
+                }</span>
+                <span class="cov0" title="0">return val</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["coalesce"] = func(values ...interface{}) interface{} </span><span class="cov1" title="1">{
+                for _, v := range values </span><span class="cov4" title="3">{
+                        if v != nil </span><span class="cov3" title="2">{
+                                // 检查空字符串
+                                if s, ok := v.(string); ok &amp;&amp; s == "" </span><span class="cov1" title="1">{
+                                        continue</span>
+                                }
+                                <span class="cov1" title="1">return v</span>
+                        }
+                }
+                <span class="cov0" title="0">return nil</span>
+        }
+
+        // 逻辑操作
+        <span class="cov10" title="13">e.funcs["and"] = func(a, b bool) bool </span><span class="cov1" title="1">{
+                return a &amp;&amp; b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["or"] = func(a, b bool) bool </span><span class="cov1" title="1">{
+                return a || b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["not"] = func(a bool) bool </span><span class="cov1" title="1">{
+                return !a
+        }</span>
+
+        // 比较
+        <span class="cov10" title="13">e.funcs["eq"] = func(a, b interface{}) bool </span><span class="cov1" title="1">{
+                return a == b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["ne"] = func(a, b interface{}) bool </span><span class="cov1" title="1">{
+                return a != b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["lt"] = func(a, b float64) bool </span><span class="cov1" title="1">{
+                return a &lt; b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["le"] = func(a, b float64) bool </span><span class="cov1" title="1">{
+                return a &lt;= b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["gt"] = func(a, b float64) bool </span><span class="cov1" title="1">{
+                return a &gt; b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["ge"] = func(a, b float64) bool </span><span class="cov1" title="1">{
+                return a &gt;= b
+        }</span>
+
+        // 字符串比较
+        <span class="cov10" title="13">e.funcs["strEq"] = func(a, b string) bool </span><span class="cov0" title="0">{
+                return a == b
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["strLt"] = func(a, b string) bool </span><span class="cov0" title="0">{
+                return a &lt; b
+        }</span>
+}
+
+// registerCryptoFunctions 注册加密与编码函数
+func (e *Engine) registerCryptoFunctions() <span class="cov10" title="13">{
+        // 哈希函数
+        e.funcs["md5"] = func(s string) string </span><span class="cov1" title="1">{
+                hash := md5.Sum([]byte(s))
+                return hex.EncodeToString(hash[:])
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["sha1"] = func(s string) string </span><span class="cov1" title="1">{
+                hash := sha1.Sum([]byte(s))
+                return hex.EncodeToString(hash[:])
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["sha256"] = func(s string) string </span><span class="cov1" title="1">{
+                hash := sha256.Sum256([]byte(s))
+                return hex.EncodeToString(hash[:])
+        }</span>
+
+        // 编码函数
+        <span class="cov10" title="13">e.funcs["base64Encode"] = func(s string) string </span><span class="cov1" title="1">{
+                return base64.StdEncoding.EncodeToString([]byte(s))
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["base64Decode"] = func(s string) string </span><span class="cov1" title="1">{
+                data, err := base64.StdEncoding.DecodeString(s)
+                if err != nil </span><span class="cov0" title="0">{
+                        return ""
+                }</span>
+                <span class="cov1" title="1">return string(data)</span>
+        }
+
+        <span class="cov10" title="13">e.funcs["hexEncode"] = func(s string) string </span><span class="cov0" title="0">{
+                return hex.EncodeToString([]byte(s))
+        }</span>
+
+        <span class="cov10" title="13">e.funcs["hexDecode"] = func(s string) string </span><span class="cov0" title="0">{
+                data, err := hex.DecodeString(s)
+                if err != nil </span><span class="cov0" title="0">{
+                        return ""
+                }</span>
+                <span class="cov0" title="0">return string(data)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">// Package template 提供模板处理功能，支持模板渲染和缓存
+package template
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "sync"
+        "text/template"
+)
+
+// Engine 提供模板处理功能
+type Engine struct {
+        templates map[string]*template.Template
+        mutex     sync.RWMutex      // 添加读写锁保证并发安全
+        funcs     template.FuncMap  // 添加自定义函数映射
+        cache     map[string][]byte // 添加结果缓存，提高性能
+}
+
+// NewEngine 创建一个新的模板引擎，并初始化内置函数
+func NewEngine() *Engine <span class="cov7" title="13">{
+        engine := &amp;Engine{
+                templates: make(map[string]*template.Template),
+                funcs:     make(template.FuncMap),
+                cache:     make(map[string][]byte),
+        }
+
+        // 初始化内置函数
+        engine.registerBuiltinFunctions()
+
+        return engine
+}</span>
+
+// AddFunc 添加自定义模板函数
+func (e *Engine) AddFunc(name string, fn interface{}) <span class="cov1" title="1">{
+        e.mutex.Lock()
+        defer e.mutex.Unlock()
+
+        e.funcs[name] = fn
+}</span>
+
+// AddTemplate 添加模板
+func (e *Engine) AddTemplate(name, tmplStr string) error <span class="cov10" title="37">{
+        e.mutex.Lock()
+        defer e.mutex.Unlock()
+
+        // 创建带有自定义函数的模板
+        tmpl := template.New(name).Funcs(e.funcs)
+
+        // 解析模板
+        parsedTmpl, err := tmpl.Parse(tmplStr)
+        if err != nil </span><span class="cov1" title="1">{
+                return fmt.Errorf("解析模板失败: %w", err)
+        }</span>
+
+        // 存储模板
+        <span class="cov9" title="36">e.templates[name] = parsedTmpl
+
+        // 清除此模板的缓存
+        delete(e.cache, name)
+
+        return nil</span>
+}
+
+// GetTemplate 获取模板
+func (e *Engine) GetTemplate(name string) (*template.Template, bool) <span class="cov9" title="35">{
+        e.mutex.RLock()
+        defer e.mutex.RUnlock()
+
+        tmpl, exists := e.templates[name]
+        return tmpl, exists
+}</span>
+
+// HasTemplate 检查模板是否存在
+func (e *Engine) HasTemplate(name string) bool <span class="cov4" title="4">{
+        e.mutex.RLock()
+        defer e.mutex.RUnlock()
+
+        _, exists := e.templates[name]
+        return exists
+}</span>
+
+// RemoveTemplate 删除模板
+func (e *Engine) RemoveTemplate(name string) <span class="cov2" title="2">{
+        e.mutex.Lock()
+        defer e.mutex.Unlock()
+
+        delete(e.templates, name)
+        delete(e.cache, name)
+}</span>
+
+// Execute 执行模板并返回渲染后的内容
+func (e *Engine) Execute(name string, data interface{}) (string, error) <span class="cov9" title="33">{
+        tmpl, exists := e.GetTemplate(name)
+        if !exists </span><span class="cov1" title="1">{
+                return "", fmt.Errorf("找不到模板: %s", name)
+        }</span>
+
+        <span class="cov9" title="32">var buf bytes.Buffer
+        err := tmpl.Execute(&amp;buf, data)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("执行模板失败: %w", err)
+        }</span>
+
+        <span class="cov9" title="32">return buf.String(), nil</span>
+}
+
+// RenderJSONTemplate 渲染JSON模板
+func (e *Engine) RenderJSONTemplate(name string, data interface{}) ([]byte, error) <span class="cov5" title="5">{
+        e.mutex.RLock()
+        // 检查缓存
+        cacheKey := fmt.Sprintf("%s_%p", name, data) // 根据模板名和数据指针生成缓存键
+        cachedResult, hasCached := e.cache[cacheKey]
+        e.mutex.RUnlock()
+
+        // 如果有缓存且同一数据对象，直接返回（避免重复计算）
+        if hasCached </span><span class="cov1" title="1">{
+                return cachedResult, nil
+        }</span>
+
+        // 执行模板
+        <span class="cov4" title="4">renderedJSON, err := e.Execute(name, data)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // 验证结果是否是有效的JSON
+        <span class="cov4" title="4">var result interface{}
+        if err := json.Unmarshal([]byte(renderedJSON), &amp;result); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("渲染结果不是有效的JSON: %w", err)
+        }</span>
+
+        // 再次序列化，确保格式正确
+        <span class="cov4" title="4">resultBytes, err := json.Marshal(result)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("重新序列化JSON失败: %w", err)
+        }</span>
+
+        // 添加到缓存
+        <span class="cov4" title="4">e.mutex.Lock()
+        e.cache[cacheKey] = resultBytes
+        e.mutex.Unlock()
+
+        return resultBytes, nil</span>
+}
+
+// ParseAndRenderJSON 解析并直接渲染JSON模板
+func (e *Engine) ParseAndRenderJSON(templateStr string, data interface{}) ([]byte, error) <span class="cov1" title="1">{
+        // 生成临时模板名称，避免冲突
+        tmplName := fmt.Sprintf("temp_template_%p", &amp;templateStr)
+
+        // 添加临时模板
+        err := e.AddTemplate(tmplName, templateStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // 渲染并获取结果
+        <span class="cov1" title="1">result, err := e.RenderJSONTemplate(tmplName, data)
+
+        // 清理临时模板
+        e.RemoveTemplate(tmplName)
+
+        return result, err</span>
+}
+
+// FormatJSON 格式化JSON字符串
+func (e *Engine) FormatJSON(jsonBytes []byte) ([]byte, error) <span class="cov1" title="1">{
+        var temp interface{}
+
+        // 解析JSON
+        if err := json.Unmarshal(jsonBytes, &amp;temp); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("解析JSON失败: %w", err)
+        }</span>
+
+        // 重新格式化
+        <span class="cov1" title="1">formatted, err := json.MarshalIndent(temp, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("格式化JSON失败: %w", err)
+        }</span>
+
+        <span class="cov1" title="1">return formatted, nil</span>
+}
+
+// ValidateJSON 验证JSON是否有效
+func (e *Engine) ValidateJSON(jsonBytes []byte) error <span class="cov2" title="2">{
+        var temp interface{}
+        if err := json.Unmarshal(jsonBytes, &amp;temp); err != nil </span><span class="cov1" title="1">{
+                return fmt.Errorf("JSON验证失败: %w", err)
+        }</span>
+        <span class="cov1" title="1">return nil</span>
+}
+
+// ClearCache 清除结果缓存
+func (e *Engine) ClearCache() <span class="cov1" title="1">{
+        e.mutex.Lock()
+        defer e.mutex.Unlock()
+
+        e.cache = make(map[string][]byte)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -74,8 +74,11 @@ func main() {
 
 	// 添加脚本钩子
 	if *scriptFile != "" {
-		// 此处应该使用hooks.NewScriptHookFromFile，但暂时使用简单逻辑替代
-		fmt.Printf("注意: 添加脚本文件 %s\n", *scriptFile)
+		if err := c.AddJSHookFromFile(*scriptFile, false, 30); err != nil {
+			fmt.Printf("添加脚本钩子失败: %v\n", *scriptFile)
+		} else {
+			fmt.Printf("已添加脚本钩子: %s\n", *scriptFile)
+		}
 	}
 
 	// 添加日志钩子
@@ -204,6 +207,23 @@ func (h *authHook) Before(req *http.Request) (*http.Request, error) {
 	return req, nil
 }
 
+// BeforeAsync 异步添加认证信息
+func (h *authHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) {
+	reqChan := make(chan *http.Request, 1)
+	errChan := make(chan error, 1)
+
+	go func() {
+		modifiedReq, err := h.Before(req)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		reqChan <- modifiedReq
+	}()
+
+	return reqChan, errChan
+}
+
 // 自定义日志钩子
 type loggingHook struct{}
 
@@ -212,10 +232,44 @@ func (h *loggingHook) Before(req *http.Request) (*http.Request, error) {
 	return req, nil
 }
 
+// BeforeAsync 异步记录请求信息
+func (h *loggingHook) BeforeAsync(req *http.Request) (chan *http.Request, chan error) {
+	reqChan := make(chan *http.Request, 1)
+	errChan := make(chan error, 1)
+
+	go func() {
+		modifiedReq, err := h.Before(req)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		reqChan <- modifiedReq
+	}()
+
+	return reqChan, errChan
+}
+
 // 响应日志钩子
 type responseLogHook struct{}
 
 func (h *responseLogHook) After(resp *http.Response) (*http.Response, error) {
 	fmt.Printf("收到响应: 状态码 %d\n", resp.StatusCode)
 	return resp, nil
+}
+
+// AfterAsync 异步记录响应信息
+func (h *responseLogHook) AfterAsync(resp *http.Response) (chan *http.Response, chan error) {
+	respChan := make(chan *http.Response, 1)
+	errChan := make(chan error, 1)
+
+	go func() {
+		modifiedResp, err := h.After(resp)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		respChan <- modifiedResp
+	}()
+
+	return respChan, errChan
 }

@@ -118,27 +118,30 @@ func (e *Engine) RenderJSONTemplate(name string, data interface{}) ([]byte, erro
 		return cachedResult, nil
 	}
 
-	// 渲染模板
+	// 执行模板
 	renderedJSON, err := e.Execute(name, data)
 	if err != nil {
 		return nil, err
 	}
 
-	// 验证生成的JSON是否有效
-	var jsonObj interface{}
-	err = json.Unmarshal([]byte(renderedJSON), &jsonObj)
-	if err != nil {
-		return nil, fmt.Errorf("生成的JSON无效: %w\n原始内容: %s", err, renderedJSON)
+	// 验证结果是否是有效的JSON
+	var result interface{}
+	if err := json.Unmarshal([]byte(renderedJSON), &result); err != nil {
+		return nil, fmt.Errorf("渲染结果不是有效的JSON: %w", err)
 	}
 
-	result := []byte(renderedJSON)
+	// 再次序列化，确保格式正确
+	resultBytes, err := json.Marshal(result)
+	if err != nil {
+		return nil, fmt.Errorf("重新序列化JSON失败: %w", err)
+	}
 
-	// 存入缓存
+	// 添加到缓存
 	e.mutex.Lock()
-	e.cache[cacheKey] = result
+	e.cache[cacheKey] = resultBytes
 	e.mutex.Unlock()
 
-	return result, nil
+	return resultBytes, nil
 }
 
 // ParseAndRenderJSON 解析并直接渲染JSON模板

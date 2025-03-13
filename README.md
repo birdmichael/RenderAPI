@@ -1,5 +1,24 @@
 # RenderAPI
 
+## 最新更新
+
+RenderAPI 现已实现以下重要更新：
+
+1. **钩子系统重构**：将钩子实现分离到独立文件中，提高可维护性
+   - `custom_hook.go` - 包含自定义钩子实现
+   - `js_hook.go` - JavaScript钩子实现
+   - `cmd_hook.go` - 命令行钩子实现
+
+2. **异步钩子支持**：所有钩子现在都支持同步和异步执行模式
+
+3. **前置和后置钩子分离**：模板定义中钩子分为`beforeHooks`和`afterHooks`两部分
+
+4. **改进的缓存系统**：支持配置TTL和自定义缓存键模式
+
+5. **重试机制增强**：完善的重试策略，支持指数退避
+
+---
+
 RenderAPI 是一个强大的 Go 语言 HTTP 客户端库，专为模板驱动的 API 请求设计。它允许用户通过 JSON 模板定义 HTTP 请求，支持动态数据插入和请求转换。
 
 ## 主要特性
@@ -314,46 +333,63 @@ RenderAPI 的模板引擎内置了丰富的函数库，使模板操作更加灵�
 
 ## 钩子系统
 
-RenderAPI提供了强大的钩子系统，允许你在请求前后进行拦截和修改：
+RenderAPI提供了强大的钩子系统，支持前置钩子（BeforeHooks）和后置钩子（AfterHooks），允许你在请求前后进行拦截和修改。现在钩子系统还支持异步执行：
 
 ```go
 // 添加请求日志钩子
-client.AddBeforeRequestHook(hooks.LoggingHook)
+client.AddBeforeHook(&hooks.LoggingHook{})
 
 // 添加认证钩子
-client.AddBeforeRequestHook(hooks.NewAuthHook("Bearer your-token"))
+client.AddBeforeHook(hooks.NewAuthHook("your-token"))
 
 // 添加响应日志钩子
-client.AddAfterResponseHook(hooks.ResponseLogHook)
+client.AddAfterHook(&hooks.ResponseLogHook{})
 
 // 添加字段转换钩子
-client.AddBeforeRequestHook(hooks.NewFieldTransformHook("user", "phone"))
+transformMap := map[string]string{
+    "user": "phone"  // 将 user 字段转换为 phone 字段
+}
+client.AddBeforeHook(hooks.NewFieldTransformHook(transformMap))
 
 // 添加自定义钩子
-client.AddBeforeRequestHook(func(req *http.Request) error {
-    req.Header.Set("X-Custom-Header", "value")
-    return nil
+client.AddBeforeHook(&hooks.CustomFunctionHook{
+    BeforeFn: func(req *http.Request) (*http.Request, error) {
+        req.Header.Set("X-Custom-Header", "value")
+        return req, nil
+    },
 })
 ```
 
-## 高级脚本钩子
+## JavaScript脚本钩子
 
-你还可以使用JavaScript脚本来修改请求：
+你可以使用JavaScript脚本来动态修改请求和响应：
 
 ```go
 // 从文件加载JavaScript脚本钩子
-scriptHook, err := hooks.NewScriptHookFromFile("scripts/transform_request.js")
-if err != nil {
+if err := client.AddJSHookFromFile("scripts/transform_request.js", false, 30); err != nil {
     log.Fatalf("加载脚本失败: %v", err)
 }
-client.AddBeforeRequestHook(scriptHook)
+
+// 从字符串加载JavaScript脚本钩子
+scriptContent := `
+function processRequest(request) {
+    // 修改请求体
+    var body = JSON.parse(request.body);
+    body.timestamp = new Date().toISOString();
+    request.body = JSON.stringify(body);
+    return request;
+}
+`
+if err := client.AddJSHookFromString(scriptContent, false, 30); err != nil {
+    log.Fatalf("添加脚本钩子失败: %v", err)
+}
 ```
 
 JavaScript脚本示例:
 
 ```javascript
 // scripts/transform_request.js
-function transformRequest(request) {
+function processRequest(request) {
     // 读取请求体
     var body = JSON.parse(request.body);
     
@@ -374,21 +410,133 @@ function transformRequest(request) {
 }
 ```
 
+## 命令行钩子
+
+你可以使用命令行脚本处理请求和响应：
+
+```go
+// 添加命令行钩子（非异步，30秒超时）
+client.AddCommandHook("jq '.user.name = .user.name | ascii_upcase'", false, 30)
+```
+
+## 模板定义中的钩子
+
+在模板定义文件中，你可以指定前置钩子和后置钩子：
+
+```json
+{
+  "request": {
+    "method": "POST",
+    "baseURL": "https://api.example.com",
+    "path": "/users",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "beforeHooks": [
+    {
+      "type": "js",
+      "name": "authHook",
+      "script": "function processRequest(request) { console.log('Auth处理请求...'); return request; }",
+      "async": false,
+      "timeout": 10
+    },
+    {
+      "type": "command",
+      "name": "timestamp",
+      "command": "jq '.body.timestamp = now'",
+      "async": false,
+      "timeout": 3
+    }
+  ],
+  "afterHooks": [
+    {
+      "type": "js",
+      "name": "postProcess",
+      "script": "function processResponse(response) { console.log('后置处理响应...'); return response; }",
+      "async": false,
+      "timeout": 5
+    }
+  ],
+  "body": {
+    "user": {
+      "name": "{{.name}}",
+      "email": "{{.email}}"
+    }
+  }
+}
+```
+
+## 缓存系统
+
+RenderAPI 提供了内置的缓存系统，可以提高性能并减少重复请求。在模板定义中配置缓存：
+
+```json
+{
+  "request": {
+    "method": "GET",
+    "path": "/users/{{.user_id}}"
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 300,
+    "keyPattern": "users-{{.user_id}}"
+  }
+}
+```
+
+缓存配置说明：
+- `enabled`: 是否启用缓存
+- `ttl`: 缓存的生存时间（秒）
+- `keyPattern`: 可选的缓存键模式，支持模板语法。如果未指定，将使用请求URL和请求体的哈希作为键
+
+## 重试机制
+
+对于不稳定的API，RenderAPI提供了内置的重试机制：
+
+```json
+{
+  "request": {
+    "method": "POST",
+    "path": "/process"
+  },
+  "retry": {
+    "enabled": true,
+    "maxAttempts": 3,
+    "initialDelay": 1000,
+    "backoffFactor": 2
+  }
+}
+```
+
+重试配置说明：
+- `enabled`: 是否启用重试
+- `maxAttempts`: 最大尝试次数
+- `initialDelay`: 首次重试前的延迟（毫秒）
+- `backoffFactor`: 退避因子，用于计算后续重试的延迟时间
+
 ## 项目结构
 
 ```
 RenderAPI/
 ├── cmd/                # 命令行工具
+│   └── httpclient/     # HTTP客户端命令行工具
 ├── pkg/                # 核心包
 │   ├── client/         # HTTP客户端实现
 │   ├── template/       # 模板引擎
 │   ├── hooks/          # 请求/响应钩子
+│   │   ├── hooks.go         # 钩子接口和通用功能
+│   │   ├── custom_hook.go   # 自定义钩子实现
+│   │   ├── js_hook.go       # JavaScript钩子实现
+│   │   └── cmd_hook.go      # 命令行钩子实现
 │   └── config/         # 配置管理
 ├── examples/           # 使用示例
 │   ├── basic/          # 基本使用示例
-│   └── advanced/       # 高级功能示例
+│   ├── advanced/       # 高级功能示例
+│   └── template_file/  # 模板文件示例
 ├── testdata/           # 测试数据
 └── internal/           # 内部工具和辅助函数
+    └── utils/          # 工具函数
 ```
 
 ## 测试
